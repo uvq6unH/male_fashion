@@ -7445,10 +7445,10 @@ del {
     padding           : 18px 36px;
     border-radius     : 5px;
     background-color  : transparent;
-    border            : 1px solid #2577fd;
+    border            : 1px solid #111111;
     font-size         : 15px;
     font-weight       : 700;
-    color             : #2577fd;
+    color             : #111111;
     text-transform    : uppercase;
     font-weight       : 400;
     -webkit-transition: .5s;
@@ -7458,7 +7458,7 @@ del {
 }
 
 .btn_3:hover {
-    background-color: #2577fd;
+    background-color: #111111;
     color           : #fff
 }
 

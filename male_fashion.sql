@@ -6,7 +6,7 @@ create table category (
     URL varchar (250) charset utf8mb3 null,
     ISACTIVE tinyint null
 ) engine = InnoDB;
-create table customer (
+create table user (
     ID int auto_increment primary key,
     NAME varchar (250) charset utf8mb3 null,
     USERNAME varchar (50) charset utf8mb3 null,
@@ -50,13 +50,13 @@ create table orders (
     IDPAYMENT int null,
     IDTRANSPORT int null,
     ORDERS_DATE timestamp null,
-    IDCUSTOMER int null,
+    IDUSER int null,
     TOTAL_MONEY double null,
     NOTES text null,
     NAME_RECIVER varchar (250) charset utf8mb3 null,
     ADDRESS varchar (500) charset utf8mb3 null,
     PHONE varchar (50) charset utf8mb3 null,
-    constraint orders_customer_ID_fk foreign key (IDCUSTOMER) references customer (ID),
+    constraint orders_customer_ID_fk foreign key (IDUSER) references user (ID),
     constraint orders_payment_ID_fk foreign key (IDPAYMENT) references payment_method (ID),
     constraint orders_transport_ID_fk foreign key (IDTRANSPORT) references transport_method (ID)
 ) engine = InnoDB;

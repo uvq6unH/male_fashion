@@ -1,38 +1,66 @@
 <?php
-// Include the database configuration file
-include 'db.php';
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
-    // Retrieve form data
+@session_start(); // Bắt đầu phiên làm việc
+
+// Khởi tạo biến thông báo
+$message = '';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Kết nối cơ sở dữ liệu
+    $servername = "localhost";
+    $db_username = "root";
+    $db_password = "";
+    $dbname = "male_fashion";
+
+    // Tạo kết nối
+    $conn = new mysqli($servername, $db_username, $db_password, $dbname);
+
+    // Kiểm tra kết nối
+    if ($conn->connect_error) {
+        die("Kết nối thất bại: " . $conn->connect_error);
+    }
+
     $username = $_POST['username'];
     $password = $_POST['password'];
     $address = $_POST['address'];
     $email = $_POST['email'];
     $phone = $_POST['phone'];
 
-    // Validate inputs (simple validation)
+    // Kiểm tra các trường không được để trống
     if (empty($username) || empty($password) || empty($address) || empty($email) || empty($phone)) {
-        echo "<p style='color:red;'>Tất cả các trường đều là bắt buộc!</p>";
+        $message = 'Tất cả các trường đều là bắt buộc!';
     } else {
-        // Hash the password
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        // Kiểm tra xem tên đăng nhập đã tồn tại chưa
+        $checkUsername = $conn->prepare("SELECT * FROM user WHERE USERNAME = ?");
+        $checkUsername->bind_param("s", $username);
+        $checkUsername->execute();
+        $result = $checkUsername->get_result();
 
-        // Insert the data into the database
-        $sql = "INSERT INTO users (username, password, address, email, phone) VALUES (?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssss", $username, $hashed_password, $address, $email, $phone);
-
-        if ($stmt->execute()) {
-            echo "<p style='color:green;'>Đăng ký thành công!</p>";
+        if ($result->num_rows > 0) {
+            $message = 'Tên đăng nhập đã tồn tại! Vui lòng chọn tên khác.';
         } else {
-            echo "<p style='color:red;'>Lỗi: " . $stmt->error . "</p>";
+            // Lưu thông tin người dùng vào cơ sở dữ liệu
+            $sql = "INSERT INTO user (USERNAME, PASSWORD, ADDRESS, EMAIL, PHONE) VALUES (?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssss", $username, $password, $address, $email, $phone); // Không hash mật khẩu
+
+            if ($stmt->execute()) {
+                $message = 'Đăng ký thành công!';
+                // Đặt lại các giá trị input
+                $username = $password = $address = $email = $phone = ''; // Làm rỗng các biến
+            } else {
+                $message = 'Lỗi khi thêm dữ liệu: ' . $stmt->error;
+            }
+
+            $stmt->close();
         }
 
-        $stmt->close();
-        // Close the database connection
-        $conn->close();
+        $checkUsername->close();
     }
+
+    $conn->close();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="zxx">
 
@@ -63,6 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
     <link rel="stylesheet" href="assets/css/slick.css">
     <link rel="stylesheet" href="assets/css/nice-select.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 
 <body>
@@ -204,7 +233,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
                             <div class="login_part_form_iner">
                                 <h3>Welcome Back ! <br>
                                     Please Create Account now</h3>
-                                <form class="row contact_form" action="login-male.php" method="POST"
+                                <form class="row contact_form" action="" method="POST"
                                     novalidate="novalidate">
                                     <div class="col-md-12 form-group p_star">
                                         <input type="text" class="form-control" id="username" name="username"
@@ -301,6 +330,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
     <script src="js/jquery.slicknav.js"></script>
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        // Kiểm tra xem có thông báo từ PHP không
+        <?php
+        if (!empty($message)) {
+            // Sử dụng JSON để tránh vấn đề về ký tự đặc biệt
+            $message_json = json_encode($message);
+            echo "Toastify({ text: $message_json, duration: 3000, gravity: 'top', position: 'right', backgroundColor: '#ff4444' }).showToast();";
+            // Nếu đăng ký thành công, chuyển hướng sau 2 giây
+            if ($message === 'Đăng ký thành công!') {
+                echo "setTimeout(function() { window.location.href = 'login-male.php'; }, 1000);";
+            }
+        }
+        ?>
+    </script>
 </body>
 
 </html>
