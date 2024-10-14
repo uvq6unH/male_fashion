@@ -93,13 +93,13 @@
             <div class="row">
                 <div class="col-lg-3 col-md-3">
                     <div class="header__logo">
-                        <a href="./inex.php"><img src="img/logo.png" alt=""></a>
+                        <a href="./index.php"><img src="img/logo.png" alt=""></a>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <nav class="header__menu mobile-menu">
                         <ul>
-                            <li><a href="./inex.php">Home</a></li>
+                            <li><a href="./index.php">Home</a></li>
                             <li class="active"><a href="./shop.php">Shop</a></li>
                             <li><a href="#">Pages</a>
                                 <ul class="dropdown">
