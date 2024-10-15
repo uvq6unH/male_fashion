@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 14, 2024 at 05:46 PM
+-- Generation Time: Oct 15, 2024 at 04:42 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -67,6 +67,13 @@ CREATE TABLE `orders` (
   `PHONE` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`ID`, `IDPAYMENT`, `IDTRANSPORT`, `ORDERS_DATE`, `IDUSER`, `TOTAL_MONEY`, `NOTES`, `NAME_RECIVER`, `ADDRESS`, `PHONE`) VALUES
+(1, NULL, NULL, '2024-10-15 14:03:51', NULL, NULL, NULL, NULL, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -107,7 +114,9 @@ CREATE TABLE `product` (
   `IMAGE` varchar(550) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `IDCATEGORY` int(11) DEFAULT NULL,
   `PRICE` double DEFAULT NULL,
-  `QUATITY` int(11) DEFAULT NULL,
+  `DESCRIPTION` text DEFAULT NULL,
+  `QUANTITY` int(11) DEFAULT NULL,
+  `RATING` float DEFAULT NULL,
   `ISACTIVE` tinyint(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -115,11 +124,20 @@ CREATE TABLE `product` (
 -- Dumping data for table `product`
 --
 
-INSERT INTO `product` (`ID`, `NAME`, `IMAGE`, `IDCATEGORY`, `PRICE`, `QUATITY`, `ISACTIVE`) VALUES
-(1, 'Diagonal Textured Cap', 'product-11.jpg', 1, 60.9, 99, 1),
-(2, 'Basic Flowing Scarf', 'product-14.jpg', 5, 26.28, 99, 1),
-(3, 'Piqué Biker Jacket', 'product-2.jpg', 3, 67.24, 99, 1),
-(4, 'Ankle Boots', 'product-12.jpg', 3, 98.49, 99, 1);
+INSERT INTO `product` (`ID`, `NAME`, `IMAGE`, `IDCATEGORY`, `PRICE`, `DESCRIPTION`, `QUANTITY`, `RATING`, `ISACTIVE`) VALUES
+(1, 'Diagonal Textured Cap', 'product-11.jpg', 1, 60.9, '', 99, 3, 1),
+(2, 'Basic Flowing Scarf', 'product-14.jpg', 5, 26.28, '', 99, 4, 1),
+(3, 'Piqué Biker Jacket', 'product-2.jpg', 3, 67.24, '', 99, 2, 1),
+(4, 'Ankle Boots', 'product-12.jpg', 3, 98.49, '', 99, 2, 1),
+(5, 'Multi-pocket Chest Bag', 'product-3.jpg', 2, 43.48, '', 99, 0, 1),
+(6, 'Diagonal Textured Cap', 'product-4.jpg', 3, 60.9, '', 99, 5, 1),
+(7, 'Ankle Boots', 'product-6.jpg', 6, 98.49, '', 99, 3, 1),
+(8, 'T-shirt Contrast Pocket', 'product-7.jpg', 1, 49.66, '', 99, 5, 1),
+(9, 'Basic Flowing Scarf', 'product-8.jpg', 3, 26.28, '', 99, 5, 1),
+(10, 'Piqué Biker Jacket', 'product-9.jpg', 3, 67.24, '', 99, 5, 1),
+(11, 'Multi-pocket Chest Bag', 'product-10.jpg', 7, 43.48, '', 99, 1, 1),
+(12, 'T-shirt Contrast Pocket', 'product-13.jpg', 1, 49.66, '', 99, 5, 1),
+(13, 'Slate Blue Handfold Fedora by Hampui', 'product-15.jpg', 4, 390, '', 99, 5, 1);
 
 -- --------------------------------------------------------
 
@@ -231,7 +249,7 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `orders_details`
@@ -249,7 +267,7 @@ ALTER TABLE `payment_method`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `transport_method`

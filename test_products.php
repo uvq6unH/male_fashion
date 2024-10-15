@@ -1,4 +1,5 @@
 <?php
+session_start();
 $servername = "localhost";
 $username = "root";
 $password = "";
@@ -96,7 +97,7 @@ $totalPages = ceil($totalProducts / $itemsPerPage);
 $offset = ($currentPage - 1) * $itemsPerPage;
 
 // Truy vấn SQL để lấy dữ liệu sản phẩm với bộ lọc danh mục và sắp xếp giá
-$sql = "SELECT p.ID, p.NAME, p.IMAGE, p.PRICE, c.NAME AS CATEGORY_NAME 
+$sql = "SELECT p.ID, p.NAME, p.IMAGE, p.PRICE, p.RATING, c.NAME AS CATEGORY_NAME 
         FROM product p 
         JOIN category c ON p.IDCATEGORY = c.ID 
         WHERE p.ISACTIVE = 1";
@@ -121,7 +122,43 @@ $sql .= " ORDER BY p.PRICE $sortOrder LIMIT $offset, $itemsPerPage"; // Thêm LI
 
 // Thực hiện truy vấn
 $result = $conn->query($sql);
+
+// Xử lý thêm sản phẩm vào giỏ hàng (add to cart)
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
+    $product_id = $_POST['product_id'];
+    $quantity = isset($_POST['quantity']) ? $_POST['quantity'] : 1; // Giá trị mặc định là 1
+    $user_id = $_SESSION['user_id']; // ID người dùng đã đăng nhập
+
+    // Kiểm tra xem đã có đơn hàng chưa (chưa thanh toán)
+    $order_query = "SELECT ID FROM orders WHERE IDUSER = ? AND TOTAL_MONEY IS NULL";
+    $stmt = $conn->prepare($order_query);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result_order = $stmt->get_result();
+
+    if ($result_order->num_rows == 0) {
+        // Nếu chưa có đơn hàng, tạo đơn hàng mới
+        $insert_order_query = "INSERT INTO orders (IDUSER, ORDERS_DATE) VALUES (?, NOW())";
+        $stmt_insert = $conn->prepare($insert_order_query);
+        $stmt_insert->bind_param("i", $user_id);
+        $stmt_insert->execute();
+        $order_id = $stmt_insert->insert_id; // Lấy ID của đơn hàng vừa tạo
+    } else {
+        // Nếu đã có đơn hàng, lấy ID đơn hàng
+        $row = $result_order->fetch_assoc();
+        $order_id = $row['ID'];
+    }
+
+    // Thêm chi tiết sản phẩm vào bảng orders_details
+    $insert_detail_query = "INSERT INTO orders_details (IDORDER, IDPRODUCT, QUANTITY) VALUES (?, ?, ?)";
+    $stmt_detail = $conn->prepare($insert_detail_query);
+    $stmt_detail->bind_param("iii", $order_id, $product_id, $quantity);
+    $stmt_detail->execute();
+
+    echo "Sản phẩm đã được thêm vào giỏ hàng!";
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="zxx">
 
@@ -149,41 +186,6 @@ $result = $conn->query($sql);
 </head>
 
 <body>
-    <!-- Page Preloder -->
-    <div id="preloder">
-        <div class="loader"></div>
-    </div>
-
-    <!-- Offcanvas Menu Begin -->
-    <div class="offcanvas-menu-overlay"></div>
-    <div class="offcanvas-menu-wrapper">
-        <div class="offcanvas__option">
-            <div class="offcanvas__links">
-                <a href="../malefashion-master/login-male.php">Sign in</a>
-                <a href="#">FAQs</a>
-            </div>
-            <div class="offcanvas__top__hover">
-                <span>Usd <i class="arrow_carrot-down"></i></span>
-                <ul>
-                    <li>USD</li>
-                    <li>EUR</li>
-                    <li>USD</li>
-                </ul>
-            </div>
-        </div>
-        <div class="offcanvas__nav__option">
-            <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
-            <a href="#"><img src="img/icon/heart.png" alt=""></a>
-            <a href="#"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
-            <div class="price">$0.00</div>
-        </div>
-        <div id="mobile-menu-wrap"></div>
-        <div class="offcanvas__text">
-            <p>Free shipping, 30-day return or refund guarantee.</p>
-        </div>
-    </div>
-    <!-- Offcanvas Menu End -->
-
     <!-- Header Section Begin -->
     <header class="header">
         <div class="header__top">
@@ -243,8 +245,8 @@ $result = $conn->query($sql);
                     <div class="header__nav__option">
                         <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
                         <a href="#"><img src="img/icon/heart.png" alt=""></a>
-                        <a href="#"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
-                        <div class="price">$0.00</div>
+                        <a href="shopping-cart.php?product_id='. $product['ID'] . '"><img src="img/icon/cart.png" alt=""> <span class="cart-count">0</span></a>
+                        <div class="price total-price">$0.00</div>
                     </div>
                 </div>
             </div>
@@ -252,24 +254,6 @@ $result = $conn->query($sql);
         </div>
     </header>
     <!-- Header Section End -->
-
-    <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-option">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="breadcrumb__text">
-                        <h4>Shop</h4>
-                        <div class="breadcrumb__links">
-                            <a href="./index.php">Home</a>
-                            <span>Shop</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Breadcrumb Section End -->
 
     <!-- Shop Section Begin -->
     <section class="shop spad">
@@ -307,23 +291,6 @@ $result = $conn->query($sql);
                                 </div>
                                 <div class="card">
                                     <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
-                                    </div>
-                                    <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__brand">
-                                                <ul>
-                                                    <li><a href="#">Louis Vuitton</a></li>
-                                                    <li><a href="#">Chanel</a></li>
-                                                    <li><a href="#">Hermes</a></li>
-                                                    <li><a href="#">Gucci</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
-                                    <div class="card-heading">
                                         <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
                                     </div>
                                     <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
@@ -337,79 +304,6 @@ $result = $conn->query($sql);
                                                     <li><a href="?price=$200.00 - $250.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$200.00 - $250.00</a></li>
                                                     <li><a href="?price=$250.00+&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$250.00+</a></li>
                                                 </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseFour">Size</a>
-                                    </div>
-                                    <div id="collapseFour" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__size">
-                                                <label for="xs">xs
-                                                    <input type="radio" id="xs">
-                                                </label>
-                                                <label for="sm">s
-                                                    <input type="radio" id="sm">
-                                                </label>
-                                                <label for="md">m
-                                                    <input type="radio" id="md">
-                                                </label>
-                                                <label for="xl">xl
-                                                    <input type="radio" id="xl">
-                                                </label>
-                                                <label for="2xl">2xl
-                                                    <input type="radio" id="2xl">
-                                                </label>
-                                                <label for="xxl">xxl
-                                                    <input type="radio" id="xxl">
-                                                </label>
-                                                <label for="3xl">3xl
-                                                    <input type="radio" id="3xl">
-                                                </label>
-                                                <label for="4xl">4xl
-                                                    <input type="radio" id="4xl">
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
-                                    </div>
-                                    <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__color">
-                                                <label class="c-1" for="sp-1">
-                                                    <input type="radio" id="sp-1">
-                                                </label>
-                                                <label class="c-2" for="sp-2">
-                                                    <input type="radio" id="sp-2">
-                                                </label>
-                                                <label class="c-3" for="sp-3">
-                                                    <input type="radio" id="sp-3">
-                                                </label>
-                                                <label class="c-4" for="sp-4">
-                                                    <input type="radio" id="sp-4">
-                                                </label>
-                                                <label class="c-5" for="sp-5">
-                                                    <input type="radio" id="sp-5">
-                                                </label>
-                                                <label class="c-6" for="sp-6">
-                                                    <input type="radio" id="sp-6">
-                                                </label>
-                                                <label class="c-7" for="sp-7">
-                                                    <input type="radio" id="sp-7">
-                                                </label>
-                                                <label class="c-8" for="sp-8">
-                                                    <input type="radio" id="sp-8">
-                                                </label>
-                                                <label class="c-9" for="sp-9">
-                                                    <input type="radio" id="sp-9">
-                                                </label>
                                             </div>
                                         </div>
                                     </div>
@@ -465,8 +359,10 @@ $result = $conn->query($sql);
                         if ($result->num_rows > 0) {
                             while ($row = $result->fetch_assoc()) {
                                 $imagePath = 'img/product/' . $row["IMAGE"];
+                                $productId = $row["ID"]; // Lưu ID sản phẩm
+                                $rating = $row["RATING"]; // Lấy giá trị đánh giá sản phẩm
                                 echo "<div class='col-lg-4 col-md-6 col-sm-6'>";
-                                echo "<div class='product__item'>";
+                                echo "<div class='product__item sale' data-id='$productId'>"; // Thêm data-id để JavaScript sử dụng
                                 echo "<div class='product__item__pic set-bg' data-setbg='$imagePath'>";
                                 echo "<ul class='product__hover'>";
                                 echo "<li><a href='#'><img src='img/icon/heart.png' alt=''></a></li>";
@@ -476,14 +372,21 @@ $result = $conn->query($sql);
                                 echo "</div>";
                                 echo "<div class='product__item__text'>";
                                 echo "<h6>" . $row["NAME"] . "</h6>";
-                                echo "<a href='#' class='add-cart'>+ Add To Cart</a>";
+                                echo "<a href='add_to_cart.php?product_id=$productId&quantity=1' class='add-cart'>+ Add To Cart</a>";
                                 echo "<div class='rating'>";
-                                for ($i = 0; $i < 5; $i++) {
-                                    echo "<i class='fa fa-star-o'></i>";
+                                // Tạo mảng cho các sao
+                                $stars = range(0, 4); // Tạo mảng từ 0 đến 4
+                                // Hiển thị sao đánh giá bằng foreach
+                                foreach ($stars as $i) {
+                                    if ($i < $rating) {
+                                        echo "<i class='fa fa-star'></i>"; // Sao đầy
+                                    } else {
+                                        echo "<i class='fa fa-star-o'></i>"; // Sao rỗng
+                                    }
                                 }
-                                echo "</div>";
+                                echo "</div>"; // Đóng thẻ rating
                                 echo "<h5>$" . number_format($row["PRICE"], 2) . "</h5>";
-                                echo "</div></div></div>";
+                                echo "</div></div></div>"; // Đóng thẻ product__item và col
                             }
                         } else {
                             echo "<p>No products found.</p>";
@@ -509,85 +412,7 @@ $result = $conn->query($sql);
             </div>
         </div>
     </section>
-    <!-- Shop Section End -->
 
-    <!-- Footer Section Begin -->
-    <footer class="footer">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-3 col-md-6 col-sm-6">
-                    <div class="footer__about">
-                        <div class="footer__logo">
-                            <a href="#"><img src="img/footer-logo.png" alt=""></a>
-                        </div>
-                        <p>The customer is at the heart of our unique business model, which includes design.</p>
-                        <a href="#"><img src="img/payment.png" alt=""></a>
-                    </div>
-                </div>
-                <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
-                    <div class="footer__widget">
-                        <h6>Shopping</h6>
-                        <ul>
-                            <li><a href="#">Clothing Store</a></li>
-                            <li><a href="#">Trending Shoes</a></li>
-                            <li><a href="#">Accessories</a></li>
-                            <li><a href="#">Sale</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6">
-                    <div class="footer__widget">
-                        <h6>Shopping</h6>
-                        <ul>
-                            <li><a href="#">Contact Us</a></li>
-                            <li><a href="#">Payment Methods</a></li>
-                            <li><a href="#">Delivary</a></li>
-                            <li><a href="#">Return & Exchanges</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-3 offset-lg-1 col-md-6 col-sm-6">
-                    <div class="footer__widget">
-                        <h6>NewLetter</h6>
-                        <div class="footer__newslatter">
-                            <p>Be the first to know about new arrivals, look books, sales & promos!</p>
-                            <form action="#">
-                                <input type="text" placeholder="Your email">
-                                <button type="submit"><span class="icon_mail_alt"></span></button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="footer__copyright__text">
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                        <p>Copyright ©
-                            <script>
-                                document.write(new Date().getFullYear());
-                            </script>2020
-                            All rights reserved | This template is made with <i class="fa fa-heart-o"
-                                aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                        </p>
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-    <!-- Footer Section End -->
-
-    <!-- Search Begin -->
-    <div class="search-model">
-        <div class="h-100 d-flex align-items-center justify-content-center">
-            <div class="search-close-switch">+</div>
-            <form class="search-model-form">
-                <input type="text" id="search-input" placeholder="Search here.....">
-            </form>
-        </div>
-    </div>
-    <!-- Search End -->
 
     <!-- Js Plugins -->
     <script src="js/jquery-3.3.1.min.js"></script>
@@ -600,6 +425,68 @@ $result = $conn->query($sql);
     <script src="js/mixitup.min.js"></script>
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chỉ định hành vi khi click vào phần hình ảnh (.product__item__pic)
+            const productPics = document.querySelectorAll('.product__item__pic');
+            productPics.forEach(pic => {
+                pic.addEventListener('click', function(event) {
+                    // Ngăn chặn sự kiện nếu click vào .product__hover bên trong .product__item__pic
+                    if (!event.target.closest('.product__hover')) {
+                        const productId = this.closest('.product__item').getAttribute('data-id');
+                        if (productId) {
+                            window.location.href = 'test_shop_details.php?id=' + productId;
+                        }
+                    }
+                });
+            });
+            // Hành vi khi click vào phần .product__hover
+            const productHovers = document.querySelectorAll('.product__hover');
+            productHovers.forEach(hover => {
+                hover.addEventListener('click', function(event) {
+                    // Ngăn chặn sự kiện click bên ngoài .product__hover
+                    event.stopPropagation();
+                    // Thực hiện chức năng khác cho .product__hover, ví dụ như mở modal
+                    console.log("Hover actions triggered");
+                    // Thêm logic cho phần hover nếu cần, ví dụ hiển thị modal
+                });
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Lấy phần tử 'price' trong header
+            const priceElement = document.querySelector('.header__nav__option .price');
+            // Gán sự kiện click cho phần tử 'price'
+            priceElement.addEventListener('click', function() {
+                // Chuyển hướng đến trang shopping-cart.php khi người dùng nhấn vào thẻ 'price'
+                window.location.href = 'shopping-cart.php';
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            let totalPrice = 0; // Tổng giá trị sản phẩm
+            let cartCount = 0; // Số lượng sản phẩm trong giỏ hàng
+            // Lấy tất cả các nút 'Add To Cart'
+            const addToCartButtons = document.querySelectorAll('.add-cart');
+            // Gán sự kiện click cho từng nút 'Add To Cart'
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault(); // Ngăn hành động mặc định (nếu có)
+                    // Lấy ID sản phẩm từ thẻ cha chứa data-id ('.product__item')
+                    const productItem = this.closest('.product__item');
+                    const productId = productItem.getAttribute('data-id');
+                    // Lấy giá sản phẩm từ thẻ h5 chứa giá tiền
+                    const productPriceText = productItem.querySelector('h5').innerText;
+                    const productPrice = parseFloat(productPriceText.replace('$', ''));
+                    // Tăng tổng giá tiền
+                    totalPrice += productPrice;
+                    cartCount += 1; // Tăng số lượng sản phẩm
+                    // Cập nhật giá tiền và số lượng sản phẩm trong giỏ hàng trên header
+                    document.querySelector('.total-price').innerText = '$' + totalPrice.toFixed(2); // Hiển thị giá tiền mới
+                    document.querySelector('.cart-count').innerText = cartCount; // Cập nhật số lượng sản phẩm
+                });
+            });
+        });
+    </script>
+
 </body>
 
 </html>

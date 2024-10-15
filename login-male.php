@@ -3,28 +3,16 @@
 // Khởi tạo biến thông báo
 $message = '';
 $redirect = false; // Biến để kiểm tra có chuyển hướng hay không
-
+include "auth.php";
+include 'db.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Kết nối cơ sở dữ liệu
-    $servername = "localhost";
-    $db_username = "root";
-    $db_password = "";
-    $dbname = "male_fashion";
-
-    // Tạo kết nối
-    $conn = new mysqli($servername, $db_username, $db_password, $dbname);
-
-    // Kiểm tra kết nối
-    if ($conn->connect_error) {
-        die("Kết nối thất bại: " . $conn->connect_error);
-    }
 
     // Lấy thông tin từ form
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
 
     // Sử dụng Prepared Statement để tránh SQL Injection
-    $stmt = $conn->prepare("SELECT USERNAME, PASSWORD FROM user WHERE USERNAME = ?");
+    $stmt = $conn->prepare("SELECT ID, USERNAME, PASSWORD, ROLE FROM user WHERE USERNAME = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -37,6 +25,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($password === $row['PASSWORD']) { // Không sử dụng hash mật khẩu
             // Đăng nhập thành công
             $_SESSION['username'] = $row['USERNAME'];
+            $_SESSION['user_id'] = $row['ID']; // Lưu ID người dùng vào session
+            // Kiểm tra vai trò người dùng
+            if ($row['ROLE'] === 'admin') {
+                $redirect_url = "admin-mau/index.html"; // URL cho admin
+            } else {
+                $redirect_url = "index.php"; // URL cho người dùng bình thường
+            }
             $redirect = true; // Đánh dấu cần chuyển hướng
         } else {
             // Mật khẩu không đúng
@@ -53,7 +48,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="zxx">
 
@@ -97,7 +91,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="offcanvas-menu-wrapper">
         <div class="offcanvas__option">
             <div class="offcanvas__links">
-                <a href="../malefashion-master/login-male.php">Sign in</a>
+                <?php if ($username): ?>
+                    <a href="edit-profile.php"><?php echo htmlspecialchars($username); ?></a>
+                <?php else: ?>
+                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
             <div class="offcanvas__top__hover">
@@ -190,7 +188,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </header>
     <!-- Header Section End -->
 
-    <main layout:fragment="content">
+    <section>
         <!-- Hero Area Start-->
         <div class="slider-area ">
             <div class="single-slider slider-height2 d-flex align-items-center">
@@ -247,7 +245,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </section>
         <!--================login_part end =================-->
-    </main>
+    </section>
 
     <!-- Footer Section Begin -->
     <footer class="footer">
@@ -338,7 +336,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Chuyển hướng sau 2 giây
             setTimeout(function() {
-                window.location.href = "secret.php"; // Thay đổi URL này nếu cần
+                window.location.href = "<?php echo $redirect_url; ?>"; // Sử dụng URL tương ứng
             }, 2000);
         <?php endif; ?>
 
