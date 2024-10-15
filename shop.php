@@ -12,23 +12,114 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Khởi tạo bộ lọc danh mục rỗng
+// Khởi tạo biến bộ lọc danh mục và điều kiện sắp xếp
 $categoryFilter = '';
+$priceFilter = '';
+$priceCondition = ''; // Khởi tạo biến $priceCondition
+$sortOrder = 'ASC'; // Mặc định sắp xếp từ thấp đến cao
+$sortOption = 'low-high'; // Khởi tạo biến $sortOption
+$itemsPerPage = 12; // Số sản phẩm hiển thị mỗi trang
+$currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Lấy trang hiện tại từ URL
+$searchQuery = ''; // Khởi tạo biến tìm kiếm
 
-// Kiểm tra xem danh mục có được thiết lập trong chuỗi truy vấn không
+// Xử lý tìm kiếm
+if (isset($_GET['search'])) {
+    $searchQuery = trim($_GET['search']);
+}
+
+// Kiểm tra xem danh mục có được thiết lập không
 if (isset($_GET['category'])) {
     $categoryFilter = $conn->real_escape_string($_GET['category']);
 }
 
+// Kiểm tra xem có lựa chọn sắp xếp giá không
+if (isset($_GET['sort'])) {
+    $sortOption = $_GET['sort'];
+
+    if ($sortOption == "low-high") {
+        $sortOrder = "ASC";
+    } elseif ($sortOption == "high-low") {
+        $sortOrder = "DESC";
+    }
+}
+
+// Kiểm tra xem có điều kiện giá nào không
+if (isset($_GET['price'])) {
+    $priceFilter = $_GET['price'];
+    // Xóa ký tự '$' nếu có và trim khoảng trắng
+    $priceFilter = str_replace('$', '', trim($priceFilter));
+
+    // Kiểm tra xem có dấu '+' không
+    if (strpos($priceFilter, '+') !== false) {
+        // Xử lý trường hợp giá lớn hơn một số nhất định
+        $minPrice = floatval(trim(str_replace('+', '', $priceFilter))); // Loại bỏ dấu '+'
+        $priceCondition = "p.PRICE >= $minPrice"; // Điều kiện cho giá lớn hơn hoặc bằng
+    } else {
+        // Tạo điều kiện lọc giá
+        $priceRange = explode(" - ", $priceFilter);
+
+        if (count($priceRange) === 2) {
+            // Điều kiện lọc cho khoảng giá
+            $minPrice = floatval(trim($priceRange[0]));
+            $maxPrice = floatval(trim($priceRange[1]));
+            $priceCondition = "p.PRICE BETWEEN $minPrice AND $maxPrice";
+        } else {
+            // Xử lý trường hợp chỉ có giá tối thiểu
+            $minPrice = floatval(trim($priceRange[0]));
+            $priceCondition = "p.PRICE >= $minPrice"; // Nếu chỉ có giá tối thiểu
+        }
+    }
+}
+
+// Truy vấn SQL để đếm tổng số sản phẩm
+$countQuery = "SELECT COUNT(*) AS total FROM product p JOIN category c ON p.IDCATEGORY = c.ID WHERE p.ISACTIVE = 1";
+
+// Thêm điều kiện lọc danh mục nếu được chọn
+if (!empty($categoryFilter)) {
+    $countQuery .= " AND c.NAME = '$categoryFilter'";
+}
+// Thêm điều kiện lọc giá nếu được chọn
+if (!empty($priceCondition)) {
+    $countQuery .= " AND $priceCondition";
+}
+// Thêm điều kiện tìm kiếm
+if (!empty($searchQuery)) {
+    $searchQuery = $conn->real_escape_string($searchQuery);
+    $countQuery .= " AND p.NAME LIKE '%$searchQuery%'";
+}
+
+$countResult = $conn->query($countQuery);
+$totalProducts = $countResult->fetch_assoc()['total'];
+
+// Tính toán số trang
+$totalPages = ceil($totalProducts / $itemsPerPage);
+$offset = ($currentPage - 1) * $itemsPerPage;
+
+// Truy vấn SQL để lấy dữ liệu sản phẩm với bộ lọc danh mục và sắp xếp giá
 $sql = "SELECT p.ID, p.NAME, p.IMAGE, p.PRICE, c.NAME AS CATEGORY_NAME 
         FROM product p 
         JOIN category c ON p.IDCATEGORY = c.ID 
         WHERE p.ISACTIVE = 1";
 
+// Thêm điều kiện lọc danh mục nếu được chọn
 if (!empty($categoryFilter)) {
     $sql .= " AND c.NAME = '$categoryFilter'";
 }
 
+// Thêm điều kiện lọc giá nếu được chọn
+if (!empty($priceCondition)) {
+    $sql .= " AND $priceCondition";
+}
+
+// Thêm điều kiện tìm kiếm
+if (!empty($searchQuery)) {
+    $sql .= " AND p.NAME LIKE '%$searchQuery%'";
+}
+
+// Thêm điều kiện sắp xếp theo giá
+$sql .= " ORDER BY p.PRICE $sortOrder LIMIT $offset, $itemsPerPage"; // Thêm LIMIT để phân trang
+
+// Thực hiện truy vấn
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -40,7 +131,7 @@ $result = $conn->query($sql);
     <meta name="keywords" content="Male_Fashion, unica, creative, html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Male-Fashion | Template</title>
+    <title>Male-Fashion | Shop</title>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
@@ -187,8 +278,8 @@ $result = $conn->query($sql);
                 <div class="col-lg-3">
                     <div class="shop__sidebar">
                         <div class="shop__sidebar__search">
-                            <form action="#">
-                                <input type="text" placeholder="Search...">
+                            <form action="" method="GET"> <!-- Gửi dữ liệu tìm kiếm qua phương thức GET -->
+                                <input type="text" name="search" placeholder="Search..." value="<?php echo htmlspecialchars($searchQuery); ?>">
                                 <button type="submit"><span class="icon_search"></span></button>
                             </form>
                         </div>
@@ -202,15 +293,13 @@ $result = $conn->query($sql);
                                         <div class="card-body">
                                             <div class="shop__sidebar__categories">
                                                 <ul class="nice-scroll">
-                                                    <li><a href="#">Men (20)</a></li>
-                                                    <li><a href="#">Women (20)</a></li>
-                                                    <li><a href="#">Bags (20)</a></li>
-                                                    <li><a href="#">Clothing (20)</a></li>
-                                                    <li><a href="#">Shoes (20)</a></li>
-                                                    <li><a href="#">Accessories (20)</a></li>
-                                                    <li><a href="#">Kids (20)</a></li>
-                                                    <li><a href="#">Kids (20)</a></li>
-                                                    <li><a href="#">Kids (20)</a></li>
+                                                    <li><a class="category-link" href="?category=Product&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Product</a></li>
+                                                    <li><a class="category-link" href="?category=Bags&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Bags</a></li>
+                                                    <li><a class="category-link" href="?category=Shoes&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Shoes</a></li>
+                                                    <li><a class="category-link" href="?category=Fashion&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Fashion</a></li>
+                                                    <li><a class="category-link" href="?category=Clothing&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Clothing</a></li>
+                                                    <li><a class="category-link" href="?category=Hats&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Hats</a></li>
+                                                    <li><a class="category-link" href="?category=Accessories&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Accessories</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -241,12 +330,12 @@ $result = $conn->query($sql);
                                         <div class="card-body">
                                             <div class="shop__sidebar__price">
                                                 <ul>
-                                                    <li><a href="#">$0.00 - $50.00</a></li>
-                                                    <li><a href="#">$50.00 - $100.00</a></li>
-                                                    <li><a href="#">$100.00 - $150.00</a></li>
-                                                    <li><a href="#">$150.00 - $200.00</a></li>
-                                                    <li><a href="#">$200.00 - $250.00</a></li>
-                                                    <li><a href="#">250.00+</a></li>
+                                                    <li><a href="?price=$0.00 - $50.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$0.00 - $50.00</a></li>
+                                                    <li><a href="?price=$50.00 - $100.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$50.00 - $100.00</a></li>
+                                                    <li><a href="?price=$100.00 - $150.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$100.00 - $150.00</a></li>
+                                                    <li><a href="?price=$150.00 - $200.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$150.00 - $200.00</a></li>
+                                                    <li><a href="?price=$200.00 - $250.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$200.00 - $250.00</a></li>
+                                                    <li><a href="?price=$250.00+&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$250.00+</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -332,13 +421,13 @@ $result = $conn->query($sql);
                                     <div id="collapseSix" class="collapse show" data-parent="#accordionExample">
                                         <div class="card-body">
                                             <div class="shop__sidebar__tags">
-                                                <a class="category-link" href="?category=Product">Product</a>
-                                                <a class="category-link" href="?category=Bags">Bags</a>
-                                                <a class="category-link" href="?category=Shoes">Shoes</a>
-                                                <a class="category-link" href="?category=Fashion">Fashion</a>
-                                                <a class="category-link" href="?category=Clothing">Clothing</a>
-                                                <a class="category-link" href="?category=Hats">Hats</a>
-                                                <a class="category-link" href="?category=Accessories">Accessories</a>
+                                                <a class="category-link" href="?category=Product&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Product</a>
+                                                <a class="category-link" href="?category=Bags&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Bags</a>
+                                                <a class="category-link" href="?category=Shoes&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Shoes</a>
+                                                <a class="category-link" href="?category=Fashion&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Fashion</a>
+                                                <a class="category-link" href="?category=Clothing&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Clothing</a>
+                                                <a class="category-link" href="?category=Hats&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Hats</a>
+                                                <a class="category-link" href="?category=Accessories&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Accessories</a>
                                             </div>
                                         </div>
                                     </div>
@@ -352,17 +441,21 @@ $result = $conn->query($sql);
                         <div class="row">
                             <div class="col-lg-6 col-md-6 col-sm-6">
                                 <div class="shop__product__option__left">
-                                    <p>Showing 1–12 of 126 results</p>
+                                    <p>Showing <?php echo min($itemsPerPage, $totalProducts - $offset); ?> of <?php echo $totalProducts; ?> results</p>
                                 </div>
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-6">
                                 <div class="shop__product__option__right">
-                                    <p>Sort by Price:</p>
-                                    <select>
-                                        <option value="">Low To High</option>
-                                        <option value="">$0 - $55</option>
-                                        <option value="">$55 - $100</option>
-                                    </select>
+                                    <form method="GET">
+                                        <p>Sort by Price:</p>
+                                        <input type="hidden" name="search" value="<?php echo htmlspecialchars($searchQuery); ?>">
+                                        <input type="hidden" name="price" value="<?php echo htmlspecialchars($priceFilter); ?>">
+                                        <input type="hidden" name="category" value="<?php echo htmlspecialchars($categoryFilter); ?>">
+                                        <select name="sort" onchange="this.form.submit()">
+                                            <option value="low-high" <?php echo $sortOption == 'low-high' ? 'selected' : ''; ?>>Low to High</option>
+                                            <option value="high-low" <?php echo $sortOption == 'high-low' ? 'selected' : ''; ?>>High to Low</option>
+                                        </select>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -390,30 +483,25 @@ $result = $conn->query($sql);
                                 }
                                 echo "</div>";
                                 echo "<h5>$" . number_format($row["PRICE"], 2) . "</h5>";
-                                echo "<div class='product__color__select'>";
-                                echo "<label for='pc-4'><input type='radio' id='pc-4'></label>";
-                                echo "<label class='active black' for='pc-5'><input type='radio' id='pc-5'></label>";
-                                echo "<label class='grey' for='pc-6'><input type='radio' id='pc-6'></label>";
-                                echo "</div>";
-                                echo "</div>"; // end product__item__text
-                                echo "</div>"; // end product__item
-                                echo "</div>"; // end col-lg-4 col-md-6 col-sm-6
+                                echo "</div></div></div>";
                             }
                         } else {
                             echo "<p>No products found.</p>";
                         }
-
-                        $conn->close();
                         ?>
                     </div>
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="product__pagination">
-                                <a class="active" href="#">1</a>
-                                <a href="#">2</a>
-                                <a href="#">3</a>
-                                <span>...</span>
-                                <a href="#">21</a>
+                                <?php
+                                for ($i = 1; $i <= $totalPages; $i++) {
+                                    if ($i == $currentPage) {
+                                        echo "<a class='active' href='?page=$i&category=" . urlencode($categoryFilter) . "&sort=$sortOption'>$i</a>";
+                                    } else {
+                                        echo "<a href='?page=$i&category=" . urlencode($categoryFilter) . "&sort=$sortOption'>$i</a>";
+                                    }
+                                }
+                                ?>
                             </div>
                         </div>
                     </div>
@@ -515,3 +603,8 @@ $result = $conn->query($sql);
 </body>
 
 </html>
+
+<?php
+// Đóng kết nối
+$conn->close();
+?>
