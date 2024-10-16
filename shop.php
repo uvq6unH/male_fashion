@@ -2,10 +2,6 @@
 session_start();
 include 'auth.php';
 include 'db.php';
-// Kiểm tra kết nối
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
 
 // Khởi tạo biến bộ lọc danh mục và điều kiện sắp xếp
 $categoryFilter = '';
@@ -167,6 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Css Styles -->
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
@@ -190,7 +187,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
     <div class="offcanvas-menu-wrapper">
         <div class="offcanvas__option">
             <div class="offcanvas__links">
-                <a href="../malefashion-master/login-male.php">Sign in</a>
+                <?php if ($username): ?>
+                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                <?php else: ?>
+                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
             <div class="offcanvas__top__hover">
@@ -229,7 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                         <div class="header__top__right">
                             <div class="header__top__links">
                                 <?php if ($username): ?>
-                                    <a href="edit-profile.php"><?php echo htmlspecialchars($username); ?></a>
+                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
                                 <?php else: ?>
                                     <a href="../malefashion-master/login-male.php">Sign in</a>
                                 <?php endif; ?>
@@ -278,7 +279,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                     <div class="header__nav__option">
                         <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
                         <a href="#"><img src="img/icon/heart.png" alt=""></a>
-                        <a href="shopping-cart.php?product_id='. $product['ID'] . '"><img src="img/icon/cart.png" alt=""> <span class="cart-count">0</span></a>
+                        <a class="shopping-cart" href="shopping-cart.php">
+                            <img src="img/icon/cart.png" alt="">
+                            <span class="cart-count">0</span>
+                        </a>
                         <div class="price total-price">$0.00</div>
                     </div>
                 </div>
@@ -497,13 +501,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                     </div>
                     <div id="product-results" class="row">
                         <?php
+                        // Giả sử $result là kết quả truy vấn sản phẩm từ CSDL
                         if ($result->num_rows > 0) {
                             while ($row = $result->fetch_assoc()) {
                                 $imagePath = 'img/product/' . $row["IMAGE"];
-                                $productId = $row["ID"]; // Lưu ID sản phẩm
-                                $rating = $row["RATING"]; // Lấy giá trị đánh giá sản phẩm
+                                $productId = $row["ID"];
+                                $rating = $row["RATING"];
                                 echo "<div class='col-lg-4 col-md-6 col-sm-6'>";
-                                echo "<div class='product__item sale' data-id='$productId'>"; // Thêm data-id để JavaScript sử dụng
+                                echo "<div class='product__item sale' data-id='$productId'>";
                                 echo "<div class='product__item__pic set-bg' data-setbg='$imagePath'>";
                                 echo "<ul class='product__hover'>";
                                 echo "<li><a href='#'><img src='img/icon/heart.png' alt=''></a></li>";
@@ -513,21 +518,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                                 echo "</div>";
                                 echo "<div class='product__item__text'>";
                                 echo "<h6>" . $row["NAME"] . "</h6>";
-                                echo "<a href='add_to_cart.php?product_id=$productId&quantity=1' class='add-cart'>+ Add To Cart</a>";
+                                echo "<a href='#' class='add-cart' data-product-id='$productId' data-quantity='1'>+ Add To Cart</a>";
                                 echo "<div class='rating'>";
-                                // Tạo mảng cho các sao
-                                $stars = range(0, 4); // Tạo mảng từ 0 đến 4
-                                // Hiển thị sao đánh giá bằng foreach
-                                foreach ($stars as $i) {
-                                    if ($i < $rating) {
-                                        echo "<i class='fa fa-star'></i>"; // Sao đầy
+                                for ($i = 0; $i < 5; $i++) {
+                                    if ($i < floor($rating)) {
+                                        echo "<i class='fa fa-star'></i>";
+                                    } elseif ($i == floor($rating) && $rating - floor($rating) >= 0.5) {
+                                        echo "<i class='fa fa-star-half-o'></i>";
                                     } else {
-                                        echo "<i class='fa fa-star-o'></i>"; // Sao rỗng
+                                        echo "<i class='fa fa-star-o'></i>";
                                     }
                                 }
-                                echo "</div>"; // Đóng thẻ rating
+                                echo "</div>";
                                 echo "<h5>$" . number_format($row["PRICE"], 2) . "</h5>";
-                                echo "</div></div></div>"; // Đóng thẻ product__item và col
+                                echo "</div></div></div>";
                             }
                         } else {
                             echo "<p>No products found.</p>";
@@ -681,32 +685,74 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
             });
         });
         document.addEventListener('DOMContentLoaded', function() {
-            let totalPrice = 0; // Tổng giá trị sản phẩm
-            let cartCount = 0; // Số lượng sản phẩm trong giỏ hàng
-            // Lấy tất cả các nút 'Add To Cart'
-            const addToCartButtons = document.querySelectorAll('.add-cart');
-            // Gán sự kiện click cho từng nút 'Add To Cart'
+            let totalPrice = 0; // Total product value
+            let cartCount = 0; // Number of products in cart
+            const addToCartButtons = document.querySelectorAll('.add-cart'); // Get all 'Add to Cart' buttons
+
             addToCartButtons.forEach(button => {
                 button.addEventListener('click', function(event) {
-                    event.preventDefault(); // Ngăn hành động mặc định (nếu có)
-                    // Lấy ID sản phẩm từ thẻ cha chứa data-id ('.product__item')
-                    const productItem = this.closest('.product__item');
-                    const productId = productItem.getAttribute('data-id');
-                    // Lấy giá sản phẩm từ thẻ h5 chứa giá tiền
-                    const productPriceText = productItem.querySelector('h5').innerText;
-                    const productPrice = parseFloat(productPriceText.replace('$', ''));
-                    // Tăng tổng giá tiền
-                    totalPrice += productPrice;
-                    cartCount += 1; // Tăng số lượng sản phẩm
-                    // Cập nhật giá tiền và số lượng sản phẩm trong giỏ hàng trên header
-                    document.querySelector('.total-price').innerText = '$' + totalPrice.toFixed(2); // Hiển thị giá tiền mới
-                    document.querySelector('.cart-count').innerText = cartCount; // Cập nhật số lượng sản phẩm
+                    event.preventDefault(); // Prevent default action
+
+                    const productItem = this.closest('.product__item'); // Get parent element
+                    const productId = productItem.getAttribute('data-id'); // Get product ID
+                    const productPriceText = productItem.querySelector('h5').innerText; // Get product price
+                    const productPrice = parseFloat(productPriceText.replace('$', '')); // Convert price to number
+
+                    // Update total price and quantity
+                    totalPrice += productPrice; // Increase total price
+                    cartCount += 1; // Increase product count
+
+                    // Update total price and count in the header
+                    document.querySelector('.total-price').innerText = '$' + totalPrice.toFixed(2); // Update price
+                    document.querySelector('.cart-count').innerText = cartCount; // Update item count
+
+                    // Send data to add-to-cart.php using Fetch API
+                    fetch('add-to-cart.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: `product_id=${productId}&quantity=1`
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.text(); // Or response.json() if your PHP returns JSON
+                        })
+                        .then(data => {
+                            console.log('Item added to cart:', data); // Handle success response if needed
+                        })
+                        .catch(error => {
+                            console.error('There was a problem with the fetch operation:', error);
+                        });
                 });
             });
         });
+
+        // Hàm gửi dữ liệu vào giỏ hàng
+        function addToCart(productId, quantity) {
+            const form = document.createElement('form'); // Tạo form mới
+            form.method = 'POST'; // Phương thức POST
+            form.action = 'add-to-cart.php'; // Địa chỉ gửi dữ liệu
+
+            const productInput = document.createElement('input'); // Tạo input cho ID sản phẩm
+            productInput.type = 'hidden';
+            productInput.name = 'product_id';
+            productInput.value = productId;
+
+            const quantityInput = document.createElement('input'); // Tạo input cho số lượng
+            quantityInput.type = 'hidden';
+            quantityInput.name = 'quantity';
+            quantityInput.value = quantity;
+
+            form.appendChild(productInput); // Thêm input sản phẩm vào form
+            form.appendChild(quantityInput); // Thêm input số lượng vào form
+            document.body.appendChild(form); // Thêm form vào body
+            form.submit(); // Gửi form
+        }
     </script>
 
-    </script>
 </body>
 
 </html>

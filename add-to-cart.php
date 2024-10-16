@@ -1,78 +1,52 @@
 <?php
 session_start();
+include 'auth.php'; // User authentication
+include 'db.php'; // Database connection
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "male_fashion";
-
-// Tạo kết nối
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Kiểm tra kết nối
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Kiểm tra xem người dùng đã đăng nhập hay chưa
+// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    die("You must be logged in to add products to the cart.");
+    header("Location: login.php"); // Redirect to login page if not logged in
+    exit();
 }
 
-// Lấy ID sản phẩm từ tham số URL
-if (!isset($_GET['product_id'])) {
-    die("Product ID is missing.");
-}
-$productId = intval($_GET['product_id']); // Chuyển đổi ID thành số nguyên
-$userId = $_SESSION['user_id']; // Lấy ID người dùng từ session
+$user_id = $_SESSION['user_id'];
+$product_id = $_POST['product_id']; // Assuming you're sending product ID via POST
+$quantity = 1; // Increment by 1 for each add-to-cart action
 
-// Kiểm tra xem đã có đơn hàng chưa
-$orderId = null;
-$orderCheckQuery = "SELECT ID FROM orders WHERE IDUSER = ? AND ORDERS_DATE IS NULL LIMIT 1";
-$stmt = $conn->prepare($orderCheckQuery);
-$stmt->bind_param("i", $userId);
+// Check if the product already exists in the cart
+$sql = "SELECT QUANTITY FROM orders_details 
+        WHERE IDPRODUCT = ? AND IDORDER = (SELECT ID FROM orders WHERE IDUSER = ? LIMIT 1)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $product_id, $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    // Nếu đã có đơn hàng, lấy ID đơn hàng
-    $orderRow = $result->fetch_assoc();
-    $orderId = $orderRow['ID'];
-} else {
-    // Nếu không có đơn hàng, tạo đơn hàng mới
-    $insertOrderQuery = "INSERT INTO orders (IDUSER, ORDERS_DATE) VALUES (?, NOW())";
-    $stmt = $conn->prepare($insertOrderQuery);
-    $stmt->bind_param("i", $userId);
+    // Product already in cart, increment quantity
+    $row = $result->fetch_assoc();
+    $new_quantity = $row['QUANTITY'] + $quantity;
+
+    $sql = "UPDATE orders_details 
+            SET QUANTITY = ? 
+            WHERE IDPRODUCT = ? AND IDORDER = (SELECT ID FROM orders WHERE IDUSER = ? LIMIT 1)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $new_quantity, $product_id, $user_id);
     $stmt->execute();
-    $orderId = $stmt->insert_id; // Lấy ID đơn hàng vừa tạo
+    $message = "Quantity updated.";
+} else {
+    // Product not in cart, add it
+    $sql = "INSERT INTO orders_details (IDORDER, IDPRODUCT, QUANTITY) 
+            VALUES ((SELECT ID FROM orders WHERE IDUSER = ? LIMIT 1), ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $user_id, $product_id, $quantity);
+    $stmt->execute();
+    $message = "Product added to cart.";
 }
 
-// Lấy giá sản phẩm từ bảng sản phẩm
-$productQuery = "SELECT PRICE FROM product WHERE ID = ?";
-$stmt = $conn->prepare($productQuery);
-$stmt->bind_param("i", $productId);
-$stmt->execute();
-$productResult = $stmt->get_result();
-
-if ($productResult->num_rows > 0) {
-    $productRow = $productResult->fetch_assoc();
-    $price = $productRow['PRICE'];
-
-    // Thêm sản phẩm vào bảng orders_details
-    $insertDetailsQuery = "INSERT INTO orders_details (IDORD, IDPRODUCT, PRICE) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($insertDetailsQuery);
-    $stmt->bind_param("iid", $orderId, $productId, $price);
-    $stmt->execute();
-
-    if ($stmt->affected_rows > 0) {
-        echo "Product added to cart successfully.";
-    } else {
-        echo "Failed to add product to cart.";
-    }
-} else {
-    echo "Product not found.";
-}
-
-// Đóng kết nối
+// Close the connection
 $stmt->close();
 $conn->close();
+
+// Redirect back to the shop or wherever you want with a success message
+header("Location: shop.php?message=" . urlencode($message));
+exit();

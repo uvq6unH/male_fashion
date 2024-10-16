@@ -39,7 +39,11 @@ include "auth.php";
     <div class="offcanvas-menu-wrapper">
         <div class="offcanvas__option">
             <div class="offcanvas__links">
-                <a href="../malefashion-master/login-male.php">Sign in</a>
+                <?php if ($username): ?>
+                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                <?php else: ?>
+                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
             <div class="offcanvas__top__hover">
@@ -78,7 +82,7 @@ include "auth.php";
                         <div class="header__top__right">
                             <div class="header__top__links">
                                 <?php if ($username): ?>
-                                    <a href="edit-profile.php"><?php echo htmlspecialchars($username); ?></a>
+                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
                                 <?php else: ?>
                                     <a href="../malefashion-master/login-male.php">Sign in</a>
                                 <?php endif; ?>
@@ -127,10 +131,14 @@ include "auth.php";
                     <div class="header__nav__option">
                         <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
                         <a href="#"><img src="img/icon/heart.png" alt=""></a>
-                        <a href="#"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
-                        <div class="price">$0.00</div>
+                        <a class="shopping-cart" href="shopping-cart.php">
+                            <img src="img/icon/cart.png" alt="">
+                            <span class="cart-count">0</span>
+                        </a>
+                        <div class="price total-price">$0.00</div>
                     </div>
                 </div>
+
             </div>
             <div class="canvas__open"><i class="fa fa-bars"></i></div>
         </div>

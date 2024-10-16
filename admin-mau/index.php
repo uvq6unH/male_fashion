@@ -34,7 +34,7 @@
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="./index.php"><img
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="../index.php"><img
                     src="../img/logo.png" alt="">
             </a>
             <!-- Divider -->
@@ -42,7 +42,7 @@
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="index.html">
+                <a class="nav-link" href="index.php">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
@@ -57,15 +57,15 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="../admin-mau/Category.html">
+                <a class="nav-link collapsed" href="../admin-mau/Category.php">
                     <i class="fa-solid fa-layer-group"></i>
-                    <span>Category</span>
+                    <span>Categories</span>
                 </a>
             </li>
 
             <!-- Nav Item - Utilities Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="../admin-mau/Orders.html">
+                <a class="nav-link collapsed" href="../admin-mau/Orders.php">
                     <i class="fa-brands fa-shopify"></i>
                     <span>Orders</span>
                 </a>
@@ -73,7 +73,7 @@
 
             <!-- Nav Item - Pages Collapse Menu -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="../admin-mau/Products.html">
+                <a class="nav-link collapsed" href="../admin-mau/Products.php">
                     <i class="fa-brands fa-product-hunt"></i>
                     <span>Products</span>
                 </a>
@@ -81,21 +81,21 @@
 
             <!-- Nav Item - Tables -->
             <li class="nav-item">
-                <a class="nav-link" href="../admin-mau/Users.html">
+                <a class="nav-link" href="../admin-mau/Users.php">
                     <i class="fa-solid fa-users"></i>
                     <span>Users</span></a>
             </li>
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
-                <a class="nav-link" href="../admin-mau/Transports.html">
+                <a class="nav-link" href="../admin-mau/Transports.php">
                     <i class="fa-solid fa-truck-arrow-right"></i>
                     <span>Transports</span></a>
             </li>
 
             <!-- Nav Item - Tables -->
             <li class="nav-item">
-                <a class="nav-link" href="../admin-mau/Payments.html">
+                <a class="nav-link" href="../admin-mau/Payments.php">
                     <i class="fa-solid fa-credit-card"></i>
                     <span>Payments</span></a>
             </li>

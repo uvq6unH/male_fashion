@@ -1,26 +1,19 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "male_fashion";
-
-// Tạo kết nối
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Kiểm tra kết nối
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+session_start();
+include 'auth.php';
+include 'db.php';
 
 // Kiểm tra xem 'id' có được truyền qua URL không
 if (isset($_GET['id'])) {
     $productId = $_GET['id'];
 
     // Truy vấn để lấy thông tin sản phẩm và hình ảnh
-    $sql = "SELECT p.ID, p.NAME, p.IMAGE, p.PRICE, p.DESCRIPTION, c.NAME AS CATEGORY_NAME 
-        FROM product p 
-        JOIN category c ON p.IDCATEGORY = c.ID 
+    // Truy vấn để lấy thông tin sản phẩm và hình ảnh
+    $sql = "SELECT p.ID, p.NAME, p.IMAGE, p.PRICE, p.DESCRIPTION, p.QUANTITY, p.RATING, c.NAME AS CATEGORY_NAME
+        FROM product p
+        JOIN category c ON p.IDCATEGORY = c.ID
         WHERE p.ID = ?";
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $productId);
     $stmt->execute();
@@ -34,13 +27,13 @@ if (isset($_GET['id'])) {
     }
 
     // Đóng kết nối
+    $stmt->close();
     $conn->close();
 } else {
     echo "ID sản phẩm không hợp lệ.";
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="zxx">
 
@@ -94,7 +87,7 @@ if (isset($_GET['id'])) {
                         <div class="tab-content">
                             <div class="tab-pane active" id="tabs-1" role="tabpanel">
                                 <div class="product__details__pic__item">
-                                    <img src="img/product/<?= $product['IMAGE']; ?>" alt="<?= $product['NAME']; ?>" >
+                                    <img src="img/product/<?= $product['IMAGE']; ?>" alt="<?= $product['NAME']; ?>">
                                 </div>
                             </div>
                         </div>
@@ -109,50 +102,17 @@ if (isset($_GET['id'])) {
                         <div class="product__details__text">
                             <h4><?= $product['NAME']; ?></h4>
                             <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star-o"></i>
-                                <span> - 5 Reviews</span>
+                                <?php for ($i = 0; $i < floor($product['RATING']); $i++): ?>
+                                    <i class="fa fa-star"></i>
+                                <?php endfor; ?>
+                                <?php if ($product['RATING'] - floor($product['RATING']) >= 0.5): ?>
+                                    <i class="fa fa-star-half-o"></i>
+                                <?php endif; ?>
+                                <span> - <?= number_format($product['RATING']); ?> out of 5</span>
                             </div>
                             <h3>$<?= number_format($product['PRICE'], 2); ?></h3>
                             <p><?= $product['DESCRIPTION']; ?></p>
-                            <div class="product__details__option">
-                                <div class="product__details__option__size">
-                                    <span>Size:</span>
-                                    <label for="xxl">xxl
-                                        <input type="radio" id="xxl">
-                                    </label>
-                                    <label class="active" for="xl">xl
-                                        <input type="radio" id="xl">
-                                    </label>
-                                    <label for="l">l
-                                        <input type="radio" id="l">
-                                    </label>
-                                    <label for="sm">s
-                                        <input type="radio" id="sm">
-                                    </label>
-                                </div>
-                                <div class="product__details__option__color">
-                                    <span>Color:</span>
-                                    <label class="c-1" for="sp-1">
-                                        <input type="radio" id="sp-1">
-                                    </label>
-                                    <label class="c-2" for="sp-2">
-                                        <input type="radio" id="sp-2">
-                                    </label>
-                                    <label class="c-3" for="sp-3">
-                                        <input type="radio" id="sp-3">
-                                    </label>
-                                    <label class="c-4" for="sp-4">
-                                        <input type="radio" id="sp-4">
-                                    </label>
-                                    <label class="c-9" for="sp-9">
-                                        <input type="radio" id="sp-9">
-                                    </label>
-                                </div>
-                            </div>
+                            <p>Available Quantity: <?= $product['QUANTITY']; ?></p>
                             <div class="product__details__cart__option">
                                 <div class="quantity">
                                     <div class="pro-qty">
@@ -193,11 +153,9 @@ if (isset($_GET['id'])) {
                             </ul>
                             <div class="tab-content">
                                 <div class="tab-pane active" id="tabs-5" role="tabpanel">
-                                    <h6>Description</h6>
                                     <p><?= $product['DESCRIPTION']; ?></p>
                                 </div>
                                 <div class="tab-pane" id="tabs-6" role="tabpanel">
-                                    <h6>Customer Reviews(5)</h6>
                                     <div class="product__details__review">
                                         <div class="product__details__review__item">
                                             <div class="product__details__review__item__pic">
@@ -222,7 +180,6 @@ if (isset($_GET['id'])) {
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tabs-7" role="tabpanel">
-                                    <h6>Shipping & Returns</h6>
                                     <p>Please refer to our shipping policy for more information.</p>
                                 </div>
                             </div>
@@ -232,6 +189,7 @@ if (isset($_GET['id'])) {
             </div>
         </div>
     </section>
+
     <!-- Shop Details Section End -->
 
     <!-- Js Plugins -->

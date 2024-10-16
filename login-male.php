@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['user_id'] = $row['ID']; // Lưu ID người dùng vào session
             // Kiểm tra vai trò người dùng
             if ($row['ROLE'] === 'admin') {
-                $redirect_url = "admin-mau/index.html"; // URL cho admin
+                $redirect_url = "admin-mau/index.php"; // URL cho admin
             } else {
                 $redirect_url = "index.php"; // URL cho người dùng bình thường
             }
@@ -92,9 +92,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="offcanvas__option">
             <div class="offcanvas__links">
                 <?php if ($username): ?>
-                    <a href="edit-profile.php"><?php echo htmlspecialchars($username); ?></a>
+                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
                 <?php else: ?>
-                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                    <?php if ($username): ?>
+                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                    <?php else: ?>
+                        <a href="../malefashion-master/login-male.php">Sign in</a>
+                    <?php endif; ?>
                 <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
@@ -132,7 +136,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="col-lg-6 col-md-5">
                         <div class="header__top__right">
                             <div class="header__top__links">
-                                <a href="../malefashion-master/login-male.php">Sign in</a>
+                                <?php if ($username): ?>
+                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                <?php else: ?>
+                                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                                <?php endif; ?>
                                 <a href="#">FAQs</a>
                             </div>
                             <div class="header__top__hover">
@@ -178,8 +186,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="header__nav__option">
                         <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
                         <a href="#"><img src="img/icon/heart.png" alt=""></a>
-                        <a href="#"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
-                        <div class="price">$0.00</div>
+                        <a class="shopping-cart" href="shopping-cart.php">
+                            <img src="img/icon/cart.png" alt="">
+                            <span class="cart-count">0</span>
+                        </a>
+                        <div class="price total-price">$0.00</div>
                     </div>
                 </div>
             </div>
@@ -318,7 +329,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="js/jquery-3.3.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/jquery.nice-select.min.js"></script>
+    <script src="js/jquery.nicescroll.min.js"></script>
     <script src="js/jquery.magnific-popup.min.js"></script>
+    <script src="js/jquery.countdown.min.js"></script>
+    <script src="js/jquery.slicknav.js"></script>
+    <script src="js/mixitup.min.js"></script>
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

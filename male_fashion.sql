@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 15, 2024 at 04:42 PM
+-- Generation Time: Oct 16, 2024 at 05:23 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -31,7 +31,7 @@ CREATE TABLE `category` (
   `ID` int(11) NOT NULL,
   `NAME` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `QUANTITY` int(11) DEFAULT NULL,
-  `URL` varchar(250) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `IMAGE` varchar(250) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `ISACTIVE` tinyint(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -39,7 +39,7 @@ CREATE TABLE `category` (
 -- Dumping data for table `category`
 --
 
-INSERT INTO `category` (`ID`, `NAME`, `QUANTITY`, `URL`, `ISACTIVE`) VALUES
+INSERT INTO `category` (`ID`, `NAME`, `QUANTITY`, `IMAGE`, `ISACTIVE`) VALUES
 (1, 'Bags', 1, 'product-11.jpg', 1),
 (2, 'Shoes', 1, 'product-1.jpg', 1),
 (3, 'Clothing', 1, 'product-2.jpg', 1),
@@ -62,17 +62,10 @@ CREATE TABLE `orders` (
   `IDUSER` int(11) DEFAULT NULL,
   `TOTAL_MONEY` double DEFAULT NULL,
   `NOTES` text DEFAULT NULL,
-  `NAME_RECIVER` varchar(250) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
+  `RECIPIENT_NAME` varchar(250) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `ADDRESS` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL,
   `PHONE` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`ID`, `IDPAYMENT`, `IDTRANSPORT`, `ORDERS_DATE`, `IDUSER`, `TOTAL_MONEY`, `NOTES`, `NAME_RECIVER`, `ADDRESS`, `PHONE`) VALUES
-(1, NULL, NULL, '2024-10-15 14:03:51', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -82,8 +75,9 @@ INSERT INTO `orders` (`ID`, `IDPAYMENT`, `IDTRANSPORT`, `ORDERS_DATE`, `IDUSER`,
 
 CREATE TABLE `orders_details` (
   `ID` int(11) NOT NULL,
-  `IDORD` int(11) DEFAULT NULL,
+  `IDORDER` int(11) DEFAULT NULL,
   `IDPRODUCT` int(11) DEFAULT NULL,
+  `QUANTITY` int(11) DEFAULT NULL,
   `PRICE` double DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -101,6 +95,14 @@ CREATE TABLE `payment_method` (
   `UPDATED_DATE` timestamp NULL DEFAULT NULL,
   `ISACTIVE` tinyint(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `payment_method`
+--
+
+INSERT INTO `payment_method` (`ID`, `NAME`, `URL`, `CREATED_DATE`, `UPDATED_DATE`, `ISACTIVE`) VALUES
+(1, 'Credit Card', 'http://example.com', NULL, NULL, 1),
+(2, 'PayPal', 'http://example.com', NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -154,6 +156,14 @@ CREATE TABLE `transport_method` (
   `ISACTIVE` tinyint(4) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `transport_method`
+--
+
+INSERT INTO `transport_method` (`ID`, `NAME`, `NOTES`, `CREATED_DATE`, `UPDATED_DATE`, `ISACTIVE`) VALUES
+(1, 'Standard Delivery', '', NULL, NULL, 1),
+(2, 'Express Delivery', '', NULL, NULL, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -178,8 +188,8 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`ID`, `NAME`, `USERNAME`, `PASSWORD`, `ROLE`, `ADDRESS`, `EMAIL`, `PHONE`, `CREATED_DATE`, `ISACTIVE`) VALUES
-(1, NULL, 'admin', 'admin', 'admin', 'admin', 'admin@admin.admin', 'admin', NULL, NULL),
-(2, 'Nguyễn Tuấn Hưng', 'puddpuss', 'Josee1567@', 'admin', 'Hà Nội', 'xenonex04@gmail.com', '0943213826', NULL, NULL),
+(1, 'Nguyễn Tuấn Hưng', 'puddpuss', 'Josee1567@', 'admin', 'Thanh Xuân, Hà Nội', 'xenonex04@gmail.com', '0943213826', NULL, 1),
+(2, 'admin', 'admin', 'admin', 'admin', 'admin', 'admin', 'admin', NULL, 1),
 (3, NULL, 'ninhmaytroem', '1', NULL, 'Kim Ngưu', 'maytroem@gmail.com', '0123456789', NULL, NULL),
 (4, NULL, 'huydz', 'huydz', NULL, 'La Thành, Hà Nội', 'huydz@gmail.com', '0987654321', NULL, NULL);
 
@@ -198,16 +208,16 @@ ALTER TABLE `category`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`ID`),
-  ADD KEY `orders_customer_ID_fk` (`IDUSER`),
-  ADD KEY `orders_payment_ID_fk` (`IDPAYMENT`),
-  ADD KEY `orders_transport_ID_fk` (`IDTRANSPORT`);
+  ADD KEY `fk_orders_payment` (`IDPAYMENT`),
+  ADD KEY `fk_orders_transport` (`IDTRANSPORT`),
+  ADD KEY `fk_orders_user` (`IDUSER`);
 
 --
 -- Indexes for table `orders_details`
 --
 ALTER TABLE `orders_details`
   ADD PRIMARY KEY (`ID`),
-  ADD KEY `orders_details_orders_ID_fk` (`IDORD`),
+  ADD KEY `orders_details_orders_ID_fk` (`IDORDER`),
   ADD KEY `orders_details_product_ID_fk` (`IDPRODUCT`);
 
 --
@@ -240,27 +250,15 @@ ALTER TABLE `user`
 --
 
 --
--- AUTO_INCREMENT for table `category`
---
-ALTER TABLE `category`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `orders_details`
 --
 ALTER TABLE `orders_details`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `payment_method`
---
-ALTER TABLE `payment_method`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -270,16 +268,10 @@ ALTER TABLE `product`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
--- AUTO_INCREMENT for table `transport_method`
---
-ALTER TABLE `transport_method`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
@@ -289,22 +281,22 @@ ALTER TABLE `user`
 -- Constraints for table `orders`
 --
 ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_customer_ID_fk` FOREIGN KEY (`IDUSER`) REFERENCES `user` (`ID`),
-  ADD CONSTRAINT `orders_payment_ID_fk` FOREIGN KEY (`IDPAYMENT`) REFERENCES `payment_method` (`ID`),
-  ADD CONSTRAINT `orders_transport_ID_fk` FOREIGN KEY (`IDTRANSPORT`) REFERENCES `transport_method` (`ID`);
+  ADD CONSTRAINT `fk_orders_payment` FOREIGN KEY (`IDPAYMENT`) REFERENCES `payment_method` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_orders_transport` FOREIGN KEY (`IDTRANSPORT`) REFERENCES `transport_method` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_orders_user` FOREIGN KEY (`IDUSER`) REFERENCES `user` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `orders_details`
 --
 ALTER TABLE `orders_details`
-  ADD CONSTRAINT `orders_details_orders_ID_fk` FOREIGN KEY (`IDORD`) REFERENCES `orders` (`ID`),
-  ADD CONSTRAINT `orders_details_product_ID_fk` FOREIGN KEY (`IDPRODUCT`) REFERENCES `product` (`ID`);
+  ADD CONSTRAINT `orders_details_orders_ID_fk` FOREIGN KEY (`IDORDER`) REFERENCES `orders` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `orders_details_product_ID_fk` FOREIGN KEY (`IDPRODUCT`) REFERENCES `product` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `product`
 --
 ALTER TABLE `product`
-  ADD CONSTRAINT `product_category_ID_fk` FOREIGN KEY (`IDCATEGORY`) REFERENCES `category` (`ID`);
+  ADD CONSTRAINT `product_category_ID_fk` FOREIGN KEY (`IDCATEGORY`) REFERENCES `category` (`ID`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

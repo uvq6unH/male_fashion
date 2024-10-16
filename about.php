@@ -35,7 +35,11 @@
     <div class="offcanvas-menu-wrapper">
         <div class="offcanvas__option">
             <div class="offcanvas__links">
-                <a href="../malefashion-master/login-male.php">Sign in</a>
+                <?php if ($username): ?>
+                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                <?php else: ?>
+                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
             <div class="offcanvas__top__hover">
@@ -73,7 +77,11 @@
                     <div class="col-lg-6 col-md-5">
                         <div class="header__top__right">
                             <div class="header__top__links">
-                                <a href="../malefashion-master/login-male.php">Sign in</a>
+                                <?php if ($username): ?>
+                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                <?php else: ?>
+                                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                                <?php endif; ?>
                                 <a href="#">FAQs</a>
                             </div>
                             <div class="header__top__hover">
@@ -119,8 +127,11 @@
                     <div class="header__nav__option">
                         <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
                         <a href="#"><img src="img/icon/heart.png" alt=""></a>
-                        <a href="#"><img src="img/icon/cart.png" alt=""> <span>0</span></a>
-                        <div class="price">$0.00</div>
+                        <a class="shopping-cart" href="shopping-cart.php">
+                            <img src="img/icon/cart.png" alt="">
+                            <span class="cart-count">0</span>
+                        </a>
+                        <div class="price total-price">$0.00</div>
                     </div>
                 </div>
             </div>
@@ -395,7 +406,7 @@
                         <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                         <p>Copyright ©
                             <script>
-                            document.write(new Date().getFullYear());
+                                document.write(new Date().getFullYear());
                             </script>2020
                             All rights reserved | This template is made with <i class="fa fa-heart-o"
                                 aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>

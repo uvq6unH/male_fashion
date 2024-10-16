@@ -199,7 +199,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                     <div class="col-lg-6 col-md-5">
                         <div class="header__top__right">
                             <div class="header__top__links">
-                                <a href="../malefashion-master/login-male.php">Sign in</a>
+                                <?php if ($username): ?>
+                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                <?php else: ?>
+                                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                                <?php endif; ?>
                                 <a href="#">FAQs</a>
                             </div>
                             <div class="header__top__hover">
