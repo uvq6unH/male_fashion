@@ -4,17 +4,22 @@ include 'auth.php'; // Xác thực người dùng
 include 'db.php'; // Kết nối cơ sở dữ liệu
 include 'discount.php';
 
-$user_id = $_SESSION['user_id'];
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+$userId = $_SESSION['user_id'];
 
 // Truy vấn để lấy thông tin giỏ hàng
-$sql = "SELECT p.ID, p.NAME, p.PRICE, SUM(od.QUANTITY) as TOTAL_QUANTITY, p.IMAGE
+$sql = "SELECT p.ID, p.NAME, p.PRICE, p.IMAGE, SUM(od.QUANTITY) as TOTAL_QUANTITY
         FROM orders_details od
         JOIN orders o ON od.IDORDER = o.ID
         JOIN product p ON od.IDPRODUCT = p.ID
-        WHERE o.IDUSER = ?
-        GROUP BY p.ID";
+        WHERE o.IDUSER = ? AND o.NOTES = 'pending'
+        GROUP BY p.ID, p.NAME, p.PRICE, p.IMAGE";
+
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("i", $userId); // Thay thế ? bằng ID người dùng
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -39,7 +44,6 @@ $couponCode = strtoupper(trim($_POST['coupon_code'] ?? '')); // Convert to upper
 
 
 // Áp dụng giảm giá nếu có
-// Your existing shopping-cart.php code...
 if (isset($_SESSION['discount'])) {
     $discountPercentage = $_SESSION['discount'];
     $discountAmount = ($total * $discountPercentage) / 100;
@@ -132,7 +136,11 @@ $conn->close();
                     <div class="col-lg-6 col-md-5">
                         <div class="header__top__right">
                             <div class="header__top__links">
-                                <a href="#">Sign in</a>
+                                <?php if ($username): ?>
+                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                <?php else: ?>
+                                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                                <?php endif; ?>
                                 <a href="#">FAQs</a>
                             </div>
                             <div class="header__top__hover">
@@ -152,25 +160,25 @@ $conn->close();
             <div class="row">
                 <div class="col-lg-3 col-md-3">
                     <div class="header__logo">
-                        <a href="./index.html"><img src="img/logo.png" alt=""></a>
+                        <a href="./index.php"><img src="img/logo.png" alt=""></a>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <nav class="header__menu mobile-menu">
                         <ul>
-                            <li><a href="./index.html">Home</a></li>
-                            <li class="active"><a href="./shop.html">Shop</a></li>
+                            <li><a href="./index.php">Home</a></li>
+                            <li class="active"><a href="./shop.php">Shop</a></li>
                             <li><a href="#">Pages</a>
                                 <ul class="dropdown">
-                                    <li><a href="./about.html">About Us</a></li>
-                                    <li><a href="./shop-details.html">Shop Details</a></li>
-                                    <li><a href="./shopping-cart.html">Shopping Cart</a></li>
-                                    <li><a href="./checkout.html">Check Out</a></li>
-                                    <li><a href="./blog-details.html">Blog Details</a></li>
+                                    <li><a href="./about.php">About Us</a></li>
+                                    <li><a href="./shop-details.php">Shop Details</a></li>
+                                    <li><a href="./shopping-cart.php">Shopping Cart</a></li>
+                                    <li><a href="./checkout.php">Check Out</a></li>
+                                    <li><a href="./blog-details.php">Blog Details</a></li>
                                 </ul>
                             </li>
-                            <li><a href="./blog.html">Blog</a></li>
-                            <li><a href="./contact.html">Contacts</a></li>
+                            <li><a href="./blog.php">Blog</a></li>
+                            <li><a href="./contact.php">Contacts</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -196,8 +204,8 @@ $conn->close();
                     <div class="breadcrumb__text">
                         <h4>Shopping Cart</h4>
                         <div class="breadcrumb__links">
-                            <a href="./index.html">Home</a>
-                            <a href="./shop.html">Shop</a>
+                            <a href="./index.php">Home</a>
+                            <a href="./shop.php">Shop</a>
                             <span>Shopping Cart</span>
                         </div>
                     </div>

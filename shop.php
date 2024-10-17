@@ -3,6 +3,15 @@ session_start();
 include 'auth.php';
 include 'db.php';
 
+// Kiểm tra xem người dùng đã đăng nhập hay chưa
+if (!isset($_SESSION['user_id'])) {
+    echo "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.";
+    exit();
+}
+
+// Lấy ID người dùng từ phiên
+$userId = $_SESSION['user_id'];
+
 // Khởi tạo biến bộ lọc danh mục và điều kiện sắp xếp
 $categoryFilter = '';
 $priceFilter = '';
@@ -115,14 +124,18 @@ $result = $conn->query($sql);
 
 // Xử lý thêm sản phẩm vào giỏ hàng (add to cart)
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
-    $product_id = $_POST['product_id'];
-    $quantity = isset($_POST['quantity']) ? $_POST['quantity'] : 1; // Giá trị mặc định là 1
-    $user_id = $_SESSION['user_id']; // ID người dùng đã đăng nhập
+    $product_id = (int)$_POST['product_id'];
+    $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1; // Giá trị mặc định là 1
+    $userId = $_SESSION['user_id']; // ID người dùng đã đăng nhập
 
     // Kiểm tra xem đã có đơn hàng chưa (chưa thanh toán)
     $order_query = "SELECT ID FROM orders WHERE IDUSER = ? AND TOTAL_MONEY IS NULL";
     $stmt = $conn->prepare($order_query);
-    $stmt->bind_param("i", $user_id);
+    if (!$stmt) {
+        echo "Lỗi truy vấn đơn hàng: " . $conn->error;
+        exit();
+    }
+    $stmt->bind_param("i", $userId);
     $stmt->execute();
     $result_order = $stmt->get_result();
 
@@ -130,22 +143,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
         // Nếu chưa có đơn hàng, tạo đơn hàng mới
         $insert_order_query = "INSERT INTO orders (IDUSER, ORDERS_DATE) VALUES (?, NOW())";
         $stmt_insert = $conn->prepare($insert_order_query);
-        $stmt_insert->bind_param("i", $user_id);
+        if (!$stmt_insert) {
+            echo "Lỗi khi tạo đơn hàng: " . $conn->error;
+            exit();
+        }
+        $stmt_insert->bind_param("i", $userId);
         $stmt_insert->execute();
         $order_id = $stmt_insert->insert_id; // Lấy ID của đơn hàng vừa tạo
+
+        // Kiểm tra nếu $order_id bị null hoặc 0
+        if ($order_id == 0) {
+            echo "Lỗi: Không thể tạo đơn hàng mới.";
+            exit();
+        } else {
+            echo "Đơn hàng mới đã được tạo với ID: " . $order_id . "<br>";
+        }
     } else {
         // Nếu đã có đơn hàng, lấy ID đơn hàng
         $row = $result_order->fetch_assoc();
         $order_id = $row['ID'];
+        echo "Sản phẩm đã được thêm vào đơn hàng hiện có với ID: " . $order_id . "<br>";
     }
 
     // Thêm chi tiết sản phẩm vào bảng orders_details
     $insert_detail_query = "INSERT INTO orders_details (IDORDER, IDPRODUCT, QUANTITY) VALUES (?, ?, ?)";
     $stmt_detail = $conn->prepare($insert_detail_query);
+    if (!$stmt_detail) {
+        echo "Lỗi khi thêm sản phẩm vào chi tiết đơn hàng: " . $conn->error;
+        exit();
+    }
     $stmt_detail->bind_param("iii", $order_id, $product_id, $quantity);
     $stmt_detail->execute();
 
-    echo "Sản phẩm đã được thêm vào giỏ hàng!";
+    // Kiểm tra xem sản phẩm có được thêm vào chi tiết đơn hàng không
+    if ($stmt_detail->affected_rows > 0) {
+        echo "Sản phẩm đã được thêm vào giỏ hàng!";
+    } else {
+        echo "Lỗi: Không thể thêm sản phẩm vào giỏ hàng.";
+    }
 }
 ?>
 
@@ -658,7 +693,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                     if (!event.target.closest('.product__hover')) {
                         const productId = this.closest('.product__item').getAttribute('data-id');
                         if (productId) {
-                            window.location.href = 'test_shop_details.php?id=' + productId;
+                            window.location.href = 'shop-details.php?id=' + productId;
                         }
                     }
                 });
@@ -675,6 +710,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                 });
             });
         });
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Lấy phần tử 'price' trong header
             const priceElement = document.querySelector('.header__nav__option .price');
@@ -684,6 +721,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                 window.location.href = 'shopping-cart.php';
             });
         });
+    </script>
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
             let totalPrice = 0; // Total product value
             let cartCount = 0; // Number of products in cart

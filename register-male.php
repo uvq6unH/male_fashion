@@ -1,23 +1,12 @@
 <?php
-@session_start(); // Bắt đầu phiên làm việc
+@session_start();
+include 'auth.php'; // Xác thực người dùng
+include 'db.php'; // Kết nối cơ sở dữ liệu // Bắt đầu phiên làm việc
 
 // Khởi tạo biến thông báo
 $message = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Kết nối cơ sở dữ liệu
-    $servername = "localhost";
-    $db_username = "root";
-    $db_password = "";
-    $dbname = "male_fashion";
-
-    // Tạo kết nối
-    $conn = new mysqli($servername, $db_username, $db_password, $dbname);
-
-    // Kiểm tra kết nối
-    if ($conn->connect_error) {
-        die("Kết nối thất bại: " . $conn->connect_error);
-    }
 
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -147,11 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="col-lg-6 col-md-5">
                         <div class="header__top__right">
                             <div class="header__top__links">
-                                <?php if ($username): ?>
-                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
-                                <?php else: ?>
-                                    <a href="../malefashion-master/login-male.php">Sign in</a>
-                                <?php endif; ?>
+                                <a href="../malefashion-master/login-male.php">Sign in</a>
                                 <a href="#">FAQs</a>
                             </div>
                             <div class="header__top__hover">
@@ -210,7 +195,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </header>
     <!-- Header Section End -->
 
-    <main layout:fragment="content">
+    <section>
         <!-- Hero Area Start-->
         <div class="slider-area ">
             <div class="single-slider slider-height2 d-flex align-items-center">
@@ -277,7 +262,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </section>
         <!--================login_part end =================-->
-    </main>
+    </section>
 
     <!-- Footer Begin -->
     <footer class="footer">

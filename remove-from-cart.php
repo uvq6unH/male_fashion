@@ -9,14 +9,14 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-$user_id = $_SESSION['user_id'];
+$userId = $_SESSION['user_id'];
 $product_id = $_GET['id']; // Get the product ID to remove
 
 // Query to get the current quantity of the product in the cart
 $sql = "SELECT QUANTITY FROM orders_details 
         WHERE IDPRODUCT = ? AND IDORDER = (SELECT ID FROM orders WHERE IDUSER = ? LIMIT 1)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("ii", $product_id, $user_id);
+$stmt->bind_param("ii", $product_id, $userId);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -31,7 +31,7 @@ if ($result->num_rows > 0) {
                 SET QUANTITY = QUANTITY - 1 
                 WHERE IDPRODUCT = ? AND IDORDER = (SELECT ID FROM orders WHERE IDUSER = ? LIMIT 1)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $product_id, $user_id);
+        $stmt->bind_param("ii", $product_id, $userId);
         $stmt->execute();
         $message = "1 item has been removed from your cart. You now have " . ($current_quantity - 1) . " of this item left.";
     } else {
@@ -39,7 +39,7 @@ if ($result->num_rows > 0) {
         $sql = "DELETE FROM orders_details 
                 WHERE IDPRODUCT = ? AND IDORDER = (SELECT ID FROM orders WHERE IDUSER = ? LIMIT 1)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ii", $product_id, $user_id);
+        $stmt->bind_param("ii", $product_id, $userId);
         $stmt->execute();
         $message = "The product has been removed from your cart.";
     }

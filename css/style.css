@@ -111,7 +111,7 @@ ol {
 -----------------------*/
 
 section {
-	margin-top: 130px;
+	margin-top: 85px;
 	position: relative;
 	z-index: 1;
 }
@@ -2572,7 +2572,9 @@ section {
 .checkout__input p span {
 	color: #e53637;
 }
-
+.checkout__input lable span{
+	color: #e53637;
+}
 .checkout__input input {
 	height       : 50px;
 	width        : 100%;
@@ -3552,6 +3554,7 @@ section {
 	.offcanvas-menu-wrapper.active {
 		opacity: 1;
 		left   : 0;
+		top: 85px;
 	}
 
 	.offcanvas__menu {
