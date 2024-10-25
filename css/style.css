@@ -109,11 +109,37 @@ ol {
 /*---------------------
   Helper CSS
 -----------------------*/
+div.slider-area {
+	margin-top: 130px;
+	position  : relative;
+	z-index   : 1;
+}
 
-section {
-	margin-top: 85px;
-	position: relative;
-	z-index: 1;
+section.blog-hero {
+	margin-top: 130px;
+}
+
+section.breadcrumb-option {
+	margin-top: 130px;
+	position  : relative;
+	z-index   : 1;
+}
+
+section.breadcrumb-blog {
+	margin-top: 130px;
+}
+
+section.map {
+	margin-top: 130px;
+}
+
+section.shop-details {
+	margin-top: 130px;
+}
+
+section.modal-content {
+	margin-top: 160px;
+	position  : relative;
 }
 
 .section-title {
@@ -331,7 +357,7 @@ section {
 	top       : 0px;
 	left      : 0;
 	width     : 100%;
-	z-index   : 9999;
+	z-index   : 5;
 }
 
 .header__top {
@@ -364,6 +390,51 @@ section {
 
 .header__top__links a:last-child {
 	margin-right: 0;
+}
+
+/* Style for dropdown */
+.header__top__links .dropdown {
+	position: relative;
+	display : inline-block;
+}
+
+.header__top__links .dropdown-content {
+	position          : absolute;
+	left              : -16px;
+	top               : 34px;
+	width             : 150px;
+	background        : #111111;
+	text-align        : left;
+	z-index           : 9;
+	opacity           : 0;
+	visibility        : hidden;
+	-webkit-transition: all 0.3s;
+	-o-transition     : all 0.3s;
+	transition        : all 0.3s;
+}
+
+.header__top__links .dropdown-content li {
+	list-style: none;
+}
+
+.header__top__links .dropdown-content li a {
+	color          : white;
+	padding        : 12px 16px;
+	text-decoration: none;
+	display        : block;
+}
+
+.header__top__links .dropdown-content li a:hover {
+	background-color: #333;
+}
+
+.header__top__links .dropdown:hover .dropdown-content {
+	opacity   : 1;
+	visibility: visible;
+}
+
+.header__top__links .dropdown:hover a {
+	color: #ffffff;
 }
 
 .header__top__hover {
@@ -1098,8 +1169,8 @@ section {
 }
 
 .product__item__text .rating i {
-	font-size   : 14px;
-	color       : #b7b7b7;
+	font-size      : 14px;
+	color          : #b7b7b7;
 	/* margin-right: -5px; */
 }
 
@@ -2572,9 +2643,11 @@ section {
 .checkout__input p span {
 	color: #e53637;
 }
-.checkout__input lable span{
+
+.checkout__input lable span {
 	color: #e53637;
 }
+
 .checkout__input input {
 	height       : 50px;
 	width        : 100%;
@@ -3554,7 +3627,7 @@ section {
 	.offcanvas-menu-wrapper.active {
 		opacity: 1;
 		left   : 0;
-		top: 85px;
+		top    : 85px;
 	}
 
 	.offcanvas__menu {

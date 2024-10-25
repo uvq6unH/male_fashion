@@ -16,8 +16,8 @@ $userId = $_SESSION['user_id'];
 $categoryFilter = '';
 $priceFilter = '';
 $priceCondition = ''; // Khởi tạo biến $priceCondition
-$sortOrder = 'ASC'; // Mặc định sắp xếp từ thấp đến cao
-$sortOption = 'low-high'; // Khởi tạo biến $sortOption
+$sortOrder = 'DESC'; // Mặc định sắp xếp từ thấp đến cao
+$sortOption = 'high-low'; // Khởi tạo biến $sortOption
 $itemsPerPage = 12; // Số sản phẩm hiển thị mỗi trang
 $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Lấy trang hiện tại từ URL
 $searchQuery = ''; // Khởi tạo biến tìm kiếm
@@ -36,10 +36,10 @@ if (isset($_GET['category'])) {
 if (isset($_GET['sort'])) {
     $sortOption = $_GET['sort'];
 
-    if ($sortOption == "low-high") {
-        $sortOrder = "ASC";
-    } elseif ($sortOption == "high-low") {
+    if ($sortOption == "high-low") {
         $sortOrder = "DESC";
+    } elseif ($sortOption == "low-high") {
+        $sortOrder = "ASC";
     }
 }
 
@@ -225,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                 <?php if ($username): ?>
                     <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
                 <?php else: ?>
-                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                    <a href="login-male.php">Sign in</a>
                 <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
@@ -265,9 +265,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                         <div class="header__top__right">
                             <div class="header__top__links">
                                 <?php if ($username): ?>
-                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                    <div class="dropdown">
+                                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                        <ul class="dropdown-content">
+                                            <li><a href="profile.php">Profile</a></li>
+                                            <li><a href="logout.php">Logout</a></li>
+                                        </ul>
+                                    </div>
                                 <?php else: ?>
-                                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                                    <a href="login-male.php">Sign in</a>
                                 <?php endif; ?>
                                 <a href="#">FAQs</a>
                             </div>
@@ -367,13 +373,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                                         <div class="card-body">
                                             <div class="shop__sidebar__categories">
                                                 <ul class="nice-scroll">
-                                                    <li><a class="category-link" href="?category=Product&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Product</a></li>
-                                                    <li><a class="category-link" href="?category=Bags&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Bags</a></li>
-                                                    <li><a class="category-link" href="?category=Shoes&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Shoes</a></li>
-                                                    <li><a class="category-link" href="?category=Fashion&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Fashion</a></li>
-                                                    <li><a class="category-link" href="?category=Clothing&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Clothing</a></li>
-                                                    <li><a class="category-link" href="?category=Hats&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Hats</a></li>
-                                                    <li><a class="category-link" href="?category=Accessories&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Accessories</a></li>
+                                                    <li><a class="category-link" href="?category=Product&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Product</a></li>
+                                                    <li><a class="category-link" href="?category=Bags&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Bags</a></li>
+                                                    <li><a class="category-link" href="?category=Shoes&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Shoes</a></li>
+                                                    <li><a class="category-link" href="?category=Fashion&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Fashion</a></li>
+                                                    <li><a class="category-link" href="?category=Clothing&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Clothing</a></li>
+                                                    <li><a class="category-link" href="?category=Hats&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Hats</a></li>
+                                                    <li><a class="category-link" href="?category=Accessories&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Accessories</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -404,12 +410,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                                         <div class="card-body">
                                             <div class="shop__sidebar__price">
                                                 <ul>
-                                                    <li><a href="?price=$0.00 - $50.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$0.00 - $50.00</a></li>
-                                                    <li><a href="?price=$50.00 - $100.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$50.00 - $100.00</a></li>
-                                                    <li><a href="?price=$100.00 - $150.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$100.00 - $150.00</a></li>
-                                                    <li><a href="?price=$150.00 - $200.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$150.00 - $200.00</a></li>
-                                                    <li><a href="?price=$200.00 - $250.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$200.00 - $250.00</a></li>
-                                                    <li><a href="?price=$250.00+&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">$250.00+</a></li>
+                                                    <li><a href="?price=$0.00 - $50.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$0.00 - $50.00</a></li>
+                                                    <li><a href="?price=$50.00 - $100.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$50.00 - $100.00</a></li>
+                                                    <li><a href="?price=$100.00 - $150.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$100.00 - $150.00</a></li>
+                                                    <li><a href="?price=$150.00 - $200.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$150.00 - $200.00</a></li>
+                                                    <li><a href="?price=$200.00 - $250.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$200.00 - $250.00</a></li>
+                                                    <li><a href="?price=$250.00+&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$250.00+</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -495,13 +501,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                                     <div id="collapseSix" class="collapse show" data-parent="#accordionExample">
                                         <div class="card-body">
                                             <div class="shop__sidebar__tags">
-                                                <a class="category-link" href="?category=Product&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Product</a>
-                                                <a class="category-link" href="?category=Bags&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Bags</a>
-                                                <a class="category-link" href="?category=Shoes&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Shoes</a>
-                                                <a class="category-link" href="?category=Fashion&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Fashion</a>
-                                                <a class="category-link" href="?category=Clothing&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Clothing</a>
-                                                <a class="category-link" href="?category=Hats&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Hats</a>
-                                                <a class="category-link" href="?category=Accessories&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'low-high'; ?>">Accessories</a>
+                                                <a class="category-link" href="?category=Product&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Product</a>
+                                                <a class="category-link" href="?category=Bags&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Bags</a>
+                                                <a class="category-link" href="?category=Shoes&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Shoes</a>
+                                                <a class="category-link" href="?category=Fashion&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Fashion</a>
+                                                <a class="category-link" href="?category=Clothing&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Clothing</a>
+                                                <a class="category-link" href="?category=Hats&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Hats</a>
+                                                <a class="category-link" href="?category=Accessories&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Accessories</a>
                                             </div>
                                         </div>
                                     </div>
@@ -526,8 +532,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                                         <input type="hidden" name="price" value="<?php echo htmlspecialchars($priceFilter); ?>">
                                         <input type="hidden" name="category" value="<?php echo htmlspecialchars($categoryFilter); ?>">
                                         <select name="sort" onchange="this.form.submit()">
-                                            <option value="low-high" <?php echo $sortOption == 'low-high' ? 'selected' : ''; ?>>Low to High</option>
                                             <option value="high-low" <?php echo $sortOption == 'high-low' ? 'selected' : ''; ?>>High to Low</option>
+                                            <option value="low-high" <?php echo $sortOption == 'low-high' ? 'selected' : ''; ?>>Low to High</option>
                                         </select>
                                     </form>
                                 </div>

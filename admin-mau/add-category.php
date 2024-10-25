@@ -6,36 +6,57 @@ include('../auth.php');
 include('../db.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get form inputs
     $name = $_POST['name'];
     $quantity = $_POST['quantity'];
-    $image = $_POST['image'];
     $isactive = isset($_POST['isactive']) ? 1 : 0;
 
-    // Validate inputs
-    if (!empty($name) && !empty($quantity)) {
-        $sql = "INSERT INTO category (NAME, QUANTITY, IMAGE, ISACTIVE) VALUES (?, ?, ?, ?)";
-
-        // Prepare and bind
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sisi", $name, $quantity, $image, $isactive);
-
-        // Execute
-        if ($stmt->execute()) {
-            echo "New category added successfully!";
-        } else {
-            echo "Error: " . $stmt->error;
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $upload_dir = __DIR__ . '/../img/product/';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
         }
 
-        // Close statement
-        $stmt->close();
+        // Lấy tên tệp
+        $image_name = basename($_FILES['image']['name']);
+        $image_path = $upload_dir . $image_name;
+
+        $imageFileType = strtolower(pathinfo($image_path, PATHINFO_EXTENSION));
+        $check = getimagesize($_FILES['image']['tmp_name']);
+
+        if ($check !== false) {
+            if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
+                if (!empty($name) && !empty($quantity)) {
+                    $sql = "INSERT INTO category (NAME, QUANTITY, IMAGE, ISACTIVE) VALUES (?, ?, ?, ?)";
+
+                    $stmt = $conn->prepare($sql);
+                    // Lưu chỉ tên ảnh vào cơ sở dữ liệu
+                    $stmt->bind_param("sisi", $name, $quantity, $image_name, $isactive);
+
+                    if ($stmt->execute()) {
+                        $message = 'New category added successfully!';
+                    } else {
+                        $message = 'Error: ' . $stmt->error;
+                    }
+
+                    // Close statement
+                    $stmt->close();
+                } else {
+                    $message = 'Please fill in all required fields.';
+                }
+            } else {
+                $message = "Error moving uploaded file. Error code: " . $_FILES['image']['error'];
+            }
+        } else {
+            $message = 'File is not an image.';
+        }
     } else {
-        echo "Please fill in all required fields.";
+        $message = 'Please select an image to upload.';
     }
 }
 
 $conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -61,6 +82,7 @@ $conn->close();
 
     <!-- Custom styles for this page -->
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
 </head>
 
@@ -386,7 +408,7 @@ $conn->close();
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <form method="POST" action="">
+                                <form method="POST" action="" enctype="multipart/form-data">
                                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                         <div class="add-button">
                                             <a href="Category.php">
@@ -416,10 +438,10 @@ $conn->close();
                                         </tfoot>
                                         <tbody>
                                             <tr>
-                                                <td><input class="form-control" type="text" name="id" required></td>
+                                                <td><input class="form-control" type="text" name="id" disabled></td>
                                                 <td><input class="form-control" type="text" name="name" required></td>
                                                 <td><input class="form-control" type="number" name="quantity" required></td>
-                                                <td><input class="form-control" type="text" name="image" required></td>
+                                                <td><input class="form-control" type="file" name="image" accept="img/product/*" required></td>
                                                 <td>
                                                     <select class="form-select form-select-sm" name="isactive" required>
                                                         <option value="1">Yes</option>
@@ -448,7 +470,7 @@ $conn->close();
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; Male Fashion</span>
                     </div>
                 </div>
             </footer>
@@ -501,6 +523,18 @@ $conn->close();
 
     <!-- Page level custom scripts -->
     <script src="js/demo/datatables-demo.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        <?php if (!empty($message)): ?>
+            Toastify({
+                text: "<?php echo $message; ?>",
+                duration: 3000,
+                gravity: 'top',
+                position: 'right',
+                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)",
+            }).showToast();
+        <?php endif; ?>
+    </script>
 
 </body>
 

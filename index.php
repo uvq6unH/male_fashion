@@ -42,7 +42,7 @@ include "auth.php";
                 <?php if ($username): ?>
                     <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
                 <?php else: ?>
-                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                    <a href="login-male.php">Sign in</a>
                 <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
@@ -82,9 +82,15 @@ include "auth.php";
                         <div class="header__top__right">
                             <div class="header__top__links">
                                 <?php if ($username): ?>
-                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                    <div class="dropdown">
+                                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                        <ul class="dropdown-content">
+                                            <li><a href="profile.php">Profile</a></li>
+                                            <li><a href="logout.php">Logout</a></li>
+                                        </ul>
+                                    </div>
                                 <?php else: ?>
-                                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                                    <a href="login-male.php">Sign in</a>
                                 <?php endif; ?>
                                 <a href="#">FAQs</a>
                             </div>
@@ -138,7 +144,6 @@ include "auth.php";
                         <div class="price total-price">$0.00</div>
                     </div>
                 </div>
-
             </div>
             <div class="canvas__open"><i class="fa fa-bars"></i></div>
         </div>
@@ -154,10 +159,10 @@ include "auth.php";
                         <div class="col-xl-5 col-lg-7 col-md-8">
                             <div class="hero__text">
                                 <h6>Summer Collection</h6>
-                                <h2>Fall - Winter Collections 2030</h2>
+                                <h2>Spring - Summer Collections 2030</h2>
                                 <p>A specialist label creating luxury essentials. Ethically crafted with an unwavering
                                     commitment to exceptional quality.</p>
-                                <a href="#" class="primary-btn">Shop now <span class="arrow_right"></span></a>
+                                <a href="shop.php" class="primary-btn">Shop now <span class="arrow_right"></span></a>
                                 <div class="hero__social">
                                     <a href="#"><i class="fa fa-facebook"></i></a>
                                     <a href="#"><i class="fa fa-twitter"></i></a>
@@ -174,11 +179,11 @@ include "auth.php";
                     <div class="row">
                         <div class="col-xl-5 col-lg-7 col-md-8">
                             <div class="hero__text">
-                                <h6>Summer Collection</h6>
+                                <h6>Winter Collection</h6>
                                 <h2>Fall - Winter Collections 2030</h2>
                                 <p>A specialist label creating luxury essentials. Ethically crafted with an unwavering
                                     commitment to exceptional quality.</p>
-                                <a href="#" class="primary-btn">Shop now <span class="arrow_right"></span></a>
+                                <a href="shop.php" class="primary-btn">Shop now <span class="arrow_right"></span></a>
                                 <div class="hero__social">
                                     <a href="#"><i class="fa fa-facebook"></i></a>
                                     <a href="#"><i class="fa fa-twitter"></i></a>
@@ -205,7 +210,7 @@ include "auth.php";
                         </div>
                         <div class="banner__item__text">
                             <h2>Clothing Collections 2030</h2>
-                            <a href="#">Shop now</a>
+                            <a href="shop.php">Shop now</a>
                         </div>
                     </div>
                 </div>
@@ -216,7 +221,7 @@ include "auth.php";
                         </div>
                         <div class="banner__item__text">
                             <h2>Accessories</h2>
-                            <a href="#">Shop now</a>
+                            <a href="shop.php">Shop now</a>
                         </div>
                     </div>
                 </div>
@@ -227,7 +232,7 @@ include "auth.php";
                         </div>
                         <div class="banner__item__text">
                             <h2>Shoes Spring 2030</h2>
-                            <a href="#">Shop now</a>
+                            <a href="shop.php">Shop now</a>
                         </div>
                     </div>
                 </div>
@@ -706,9 +711,11 @@ include "auth.php";
                         <p>Copyright ©
                             <script>
                                 document.write(new Date().getFullYear());
-                            </script>2020
-                            All rights reserved | This template is made with <i class="fa fa-heart-o"
-                                aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                            </script> |
+                            All rights reserved | This template is made with
+                            <i class="fa fa-heart-o" aria-hidden="true"></i>
+                            by
+                            <a href="https://colorlib.com" target="_blank">Colorlib</a>
                         </p>
                         <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                     </div>

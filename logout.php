@@ -8,6 +8,5 @@ $_SESSION = [];
 session_destroy();
 
 // Redirect to the homepage or login page
-header("Location: ../malefashion-master/login-male.php"); // Change the location as needed
+header("Location: login-male.php"); // Change the location as needed
 exit;
-?>

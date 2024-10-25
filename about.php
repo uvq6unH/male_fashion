@@ -1,3 +1,8 @@
+<?php
+session_start();
+include 'auth.php'; // Xác thực người dùng
+include 'db.php'; // Kết nối cơ sở dữ liệu
+?>
 <!DOCTYPE html>
 <html lang="zxx">
 
@@ -38,7 +43,7 @@
                 <?php if ($username): ?>
                     <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
                 <?php else: ?>
-                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                    <a href="login-male.php">Sign in</a>
                 <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
@@ -78,9 +83,15 @@
                         <div class="header__top__right">
                             <div class="header__top__links">
                                 <?php if ($username): ?>
-                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                    <div class="dropdown">
+                                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                        <ul class="dropdown-content">
+                                            <li><a href="profile.php">Profile</a></li>
+                                            <li><a href="logout.php">Logout</a></li>
+                                        </ul>
+                                    </div>
                                 <?php else: ?>
-                                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                                    <a href="login-male.php">Sign in</a>
                                 <?php endif; ?>
                                 <a href="#">FAQs</a>
                             </div>
@@ -89,7 +100,7 @@
                                 <ul>
                                     <li>USD</li>
                                     <li>EUR</li>
-                                    <li>USD</li>
+                                    <li>VND</li>
                                 </ul>
                             </div>
                         </div>
@@ -202,16 +213,16 @@
                 <div class="col-lg-6 p-0">
                     <div class="testimonial__text">
                         <span class="icon_quotations"></span>
-                        <p>“Going out after work? Take your butane curling iron with you to the office, heat it up,
-                            style your hair before you leave the office and you won’t have to make a trip back home.”
+                        <p>“Beauty is not in the cheeks of the woman but in the style of the man.”
                         </p>
                         <div class="testimonial__author">
                             <div class="testimonial__author__pic">
-                                <img src="img/about/testimonial-author.jpg" alt="">
+                                <img src="img/about/who.jpg" alt="">
                             </div>
                             <div class="testimonial__author__text">
-                                <h5>Augusta Schultz</h5>
-                                <p>Fashion Design</p>
+                                <h5>Josée</h5>
+                                <h6>I'm not saying that</h6>
+                                <p>Web Developer</p>
                             </div>
                         </div>
                     </div>
@@ -273,36 +284,36 @@
                 <div class="col-lg-12">
                     <div class="section-title">
                         <span>Our Team</span>
-                        <h2>Meet Our Team</h2>
+                        <h2>Meet Me</h2>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="team__item">
-                        <img src="img/about/team-1.jpg" alt="">
-                        <h4>John Smith</h4>
+                        <img src="img/about/ah.jpg" alt="">
+                        <h4>Nguyễn Anh Huy</h4>
                         <span>Fashion Design</span>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="team__item">
-                        <img src="img/about/team-2.jpg" alt="">
-                        <h4>Christine Wise</h4>
+                        <img src="img/about/ah.jpg" alt="">
+                        <h4>Nguyễn Anh Huy</h4>
                         <span>C.E.O</span>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="team__item">
-                        <img src="img/about/team-3.jpg" alt="">
-                        <h4>Sean Robbins</h4>
+                        <img src="img/about/ah.jpg" alt="">
+                        <h4>Nguyễn Anh Huy</h4>
                         <span>Manager</span>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="team__item">
-                        <img src="img/about/team-4.jpg" alt="">
-                        <h4>Lucy Myers</h4>
+                        <img src="img/about/ah.jpg" alt="">
+                        <h4>Nguyễn Anh Huy</h4>
                         <span>Delivery</span>
                     </div>
                 </div>

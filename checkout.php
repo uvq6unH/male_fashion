@@ -75,23 +75,6 @@ $stmt = $conn->prepare($checkQuery);
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $checkResult = $stmt->get_result();
-$order = $checkResult->fetch_assoc(); // Lấy dữ liệu của đơn hàng mới nhất
-
-$hasNull = false;
-if ($order) {
-    // Kiểm tra xem các trường có giá trị NULL không
-    $hasNull = is_null($order['ORDERS_DATE']) || is_null($order['NOTES']);
-}
-
-// Chỉ tạo đơn hàng mới nếu không có trường nào là NULL trong đơn hàng mới nhất
-if (!$hasNull) {
-    // Tạo đơn hàng mới với trạng thái 'pending'
-    $sql_new_order = "INSERT INTO orders (IDUSER, ORDERS_DATE, NOTES) VALUES (?, NOW(), 'pending')";
-    $stmt = $conn->prepare($sql_new_order);
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -133,7 +116,7 @@ if (!$hasNull) {
                 <?php if ($username): ?>
                     <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
                 <?php else: ?>
-                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                    <a href="login-male.php">Sign in</a>
                 <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
@@ -173,11 +156,17 @@ if (!$hasNull) {
                         <div class="header__top__right">
                             <div class="header__top__links">
                                 <?php if ($username): ?>
-                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                    <div class="dropdown">
+                                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                        <ul class="dropdown-content">
+                                            <li><a href="profile.php">Profile</a></li>
+                                            <li><a href="logout.php">Logout</a></li>
+                                        </ul>
+                                    </div>
                                 <?php else: ?>
-                                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                                    <a href="login-male.phpign in</a>
                                 <?php endif; ?>
-                                <a href="#">FAQs</a>
+                                <a href=" #">FAQs</a>
                             </div>
                             <div class="header__top__hover">
                                 <span>Usd <i class="arrow_carrot-down"></i></span>
@@ -343,10 +332,11 @@ if (!$hasNull) {
         </div>
     </section>
     <!-- Checkout Section End -->
+     
     <!-- Modal for Place Order -->
     <div class="modal fade" id="placeOrderModal" tabindex="-1" role="dialog" aria-labelledby="placeOrderLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
+            <section class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="placeOrderLabel">Billing Information</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -451,7 +441,7 @@ if (!$hasNull) {
                         <button type="submit" class="btn btn-primary">Continue</button>
                     </form>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 

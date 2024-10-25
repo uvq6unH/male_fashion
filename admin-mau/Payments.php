@@ -365,25 +365,25 @@ $result = $conn->query($sql);
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Name</th>
+                                            <th>NAME</th>
                                             <th>URL</th>
-                                            <th>Created Date</th>
-                                            <th>Updated Date</th>
-                                            <th>Is Active</th>
-                                            <th>Update</th>
-                                            <th>Delete</th>
+                                            <th>CREATED DATE</th>
+                                            <th>UPDATED DATE</th>
+                                            <th>IS ACTICE</th>
+                                            <th>UPDATE</th>
+                                            <th>DELETE</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Name</th>
+                                            <th>NAME</th>
                                             <th>URL</th>
-                                            <th>Created Date</th>
-                                            <th>Updated Date</th>
-                                            <th>Is Active</th>
-                                            <th>Update</th>
-                                            <th>Delete</th>
+                                            <th>CREATED DATE</th>
+                                            <th>UPDATED DATE</th>
+                                            <th>IS ACTICE</th>
+                                            <th>UPDATE</th>
+                                            <th>DELETE</th>
                                         </tr>
                                     </tfoot>
                                     <tbody>
@@ -422,7 +422,7 @@ $result = $conn->query($sql);
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; Male Fashion</span>
                     </div>
                 </div>
             </footer>

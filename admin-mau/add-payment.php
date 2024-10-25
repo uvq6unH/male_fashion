@@ -390,18 +390,18 @@ $conn->close();
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Name</th>
+                                                <th>NAME</th>
                                                 <th>URL</th>
-                                                <th>Is Active</th>
+                                                <th>IS ACTICE</th>
                                                 <th>ADD</th>
                                             </tr>
                                         </thead>
                                         <tfoot>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Name</th>
+                                                <th>NAME</th>
                                                 <th>URL</th>
-                                                <th>Is Active</th>
+                                                <th>IS ACTICE</th>
                                                 <th>ADD</th>
                                             </tr>
                                         </tfoot>
@@ -439,7 +439,7 @@ $conn->close();
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; Male Fashion</span>
                     </div>
                 </div>
             </footer>

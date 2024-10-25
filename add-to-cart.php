@@ -41,7 +41,7 @@ $product = $result->fetch_assoc();
 $product_price = $product['PRICE'];
 
 // Tính tổng giá (giá sản phẩm * số lượng)
-$total_price = $product_price * $quantity;
+$total_money = $product_price * $quantity;
 
 // Kiểm tra nếu sản phẩm đã có trong giỏ hàng
 $sql = "SELECT QUANTITY FROM orders_details 
@@ -69,10 +69,37 @@ if ($result->num_rows > 0) {
     $sql = "INSERT INTO orders_details (IDORDER, IDPRODUCT, QUANTITY, PRICE) 
             VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iiid", $order_id, $product_id, $quantity, $total_price);
+    $stmt->bind_param("iiid", $order_id, $product_id, $quantity, $total_money);
     $stmt->execute();
     $message = "Sản phẩm đã được thêm vào giỏ hàng.";
 }
+
+// Cập nhật tổng tiền trong bảng orders
+// Lấy tổng giá đơn hàng hiện tại từ orders_details
+$sql_total = "SELECT SUM(PRICE) AS total_money FROM orders_details 
+              WHERE IDORDER = ?";
+$stmt_total = $conn->prepare($sql_total);
+$stmt_total->bind_param("i", $order_id);
+$stmt_total->execute();
+$result_total = $stmt_total->get_result();
+$current_total_money = $result_total->fetch_assoc()['total_money'];
+
+// Kiểm tra xem mã giảm giá có trong session không
+$discount = $_SESSION['discount'] ?? 0; // Nếu không có mã giảm giá, discount sẽ là 0%
+
+// Áp dụng mã giảm giá (nếu có)
+if ($discount > 0) {
+    $current_total_money = $current_total_money - ($current_total_money * ($discount / 100)); // Áp dụng giảm giá
+}
+
+// Làm tròn số tiền đến 2 chữ số thập phân
+$current_total_money = round($current_total_money, 2);
+
+// Cập nhật tổng tiền vào bảng orders
+$sql_update_order = "UPDATE orders SET TOTAL_MONEY = ? WHERE ID = ?";
+$stmt_update_order = $conn->prepare($sql_update_order);
+$stmt_update_order->bind_param("di", $current_total_money, $order_id);
+$stmt_update_order->execute();
 
 // Đóng kết nối
 $stmt->close();

@@ -365,31 +365,31 @@ $result = $conn->query($sql);
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Name</th>
-                                            <th>Username</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Address</th>
-                                            <th>Role</th>
-                                            <th>Created Date</th>
-                                            <th>Is Active</th>
-                                            <th>Update</th>
-                                            <th>Delete</th>
+                                            <th>NAME</th>
+                                            <th>USERNAME</th>
+                                            <th>EMAIL</th>
+                                            <th>PHONE</th>
+                                            <th>ADDRESS</th>
+                                            <th>ROLE</th>
+                                            <th>CREATED DATE</th>
+                                            <th>IS ACTICE</th>
+                                            <th>UPDATE</th>
+                                            <th>DELETE</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Name</th>
-                                            <th>Username</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Address</th>
-                                            <th>Role</th>
-                                            <th>Created Date</th>
-                                            <th>Is Active</th>
-                                            <th>Update</th>
-                                            <th>Delete</th>
+                                            <th>NAME</th>
+                                            <th>USERNAME</th>
+                                            <th>EMAIL</th>
+                                            <th>PHONE</th>
+                                            <th>ADDRESS</th>
+                                            <th>ROLE</th>
+                                            <th>CREATED DATE</th>
+                                            <th>IS ACTICE</th>
+                                            <th>UPDATE</th>
+                                            <th>DELETE</th>
                                         </tr>
                                     </tfoot>
                                     <tbody>
@@ -431,7 +431,7 @@ $result = $conn->query($sql);
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; Male Fashion</span>
                     </div>
                 </div>
             </footer>

@@ -1,52 +1,34 @@
 <?php
-@session_start(); // Bắt đầu phiên làm việc
-// Khởi tạo biến thông báo
-$message = '';
-$redirect = false; // Biến để kiểm tra có chuyển hướng hay không
-include "auth.php";
-include 'db.php';
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+session_start();
+include 'auth.php'; // Xác thực người dùng
+include 'db.php'; // Kết nối cơ sở dữ liệu
 
-    // Lấy thông tin từ form
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
-
-    // Sử dụng Prepared Statement để tránh SQL Injection
-    $stmt = $conn->prepare("SELECT ID, USERNAME, PASSWORD, ROLE FROM user WHERE USERNAME = ?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    // Kiểm tra và xử lý kết quả
-    if ($result->num_rows == 1) {
-        $row = $result->fetch_assoc();
-
-        // So sánh mật khẩu nhập vào với mật khẩu từ cơ sở dữ liệu
-        if ($password === $row['PASSWORD']) { // Không sử dụng hash mật khẩu
-            // Đăng nhập thành công
-            $_SESSION['username'] = $row['USERNAME'];
-            $_SESSION['user_id'] = $row['ID']; // Lưu ID người dùng vào session
-            // Kiểm tra vai trò người dùng
-            if ($row['ROLE'] === 'admin') {
-                $redirect_url = "admin-mau/index.php"; // URL cho admin
-            } else {
-                $redirect_url = "index.php"; // URL cho người dùng bình thường
-            }
-            $redirect = true; // Đánh dấu cần chuyển hướng
-        } else {
-            // Mật khẩu không đúng
-            $message = "Tài khoản hoặc mật khẩu không đúng!";
-        }
-    } else {
-        // Không tìm thấy tài khoản
-        $message = "Không tìm thấy tài khoản!";
-    }
-
-    // Đóng kết nối nếu đã mở
-    if (isset($conn)) {
-        $conn->close();
-    }
+// Kiểm tra xem người dùng đã đăng nhập chưa
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
 }
+
+$userId = $_SESSION['user_id'];
+
+// Lấy thông tin người dùng từ cơ sở dữ liệu
+$sql = "SELECT NAME, USERNAME, PHONE, EMAIL, ADDRESS FROM user WHERE ID = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $user = $result->fetch_assoc();
+    $nameParts = explode(' ', $user['NAME'], 2);
+    $firstName = $nameParts[0];
+    $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
+} else {
+    echo "Không tìm thấy thông tin người dùng.";
+    exit();
+}
+
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="zxx">
@@ -57,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="keywords" content="Male_Fashion, unica, creative, html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Male-Fashion | Login</title>
+    <title>Male-Fashion | Template</title>
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap"
@@ -72,11 +54,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
-    <link rel="stylesheet" href="assets/css/flaticon.css">
-    <link rel="stylesheet" href="assets/css/animate.min.css">
-    <link rel="stylesheet" href="assets/css/themify-icons.css">
-    <link rel="stylesheet" href="assets/css/slick.css">
-    <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 
@@ -94,11 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <?php if ($username): ?>
                     <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
                 <?php else: ?>
-                    <?php if ($username): ?>
-                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
-                    <?php else: ?>
-                        <a href="login-male.php">Sign in</a>
-                    <?php endif; ?>
+                    <a href="login-male.php">Sign in</a>
                 <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
@@ -123,6 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
     <!-- Offcanvas Menu End -->
+
     <!-- Header Section Begin -->
     <header class="header">
         <div class="header__top">
@@ -205,64 +179,122 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </header>
     <!-- Header Section End -->
 
-    <section>
-        <!-- Hero Area Start-->
-        <div class="slider-area ">
-            <div class="single-slider slider-height2 d-flex align-items-center">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-xl-12">
-                            <div class="hero-cap text-center">
-                                <h2>Login</h2>
-                            </div>
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__text">
+                        <h4>Profile</h4>
+                        <div class="breadcrumb__links">
+                            <a href="./index.php">Home</a>
+                            <span>Profile</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Hero Area End-->
-        <!--================login_part Area =================-->
-        <section class="login_part section_padding ">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-lg-6 col-md-6">
-                        <div class="login_part_text text-center">
-                            <div class="login_part_text_iner">
-                                <h2>New to our Shop?</h2>
-                                <p>There are advances being made in science and technology
-                                    every day, and a good example of this is the</p>
-                                <a href="register-male.php" class="btn_3">Create an Account</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-md-6">
-                        <div class="login_part_form">
-                            <div class="login_part_form_iner">
-                                <h3>Welcome Back ! <br>
-                                    Please Sign in now</h3>
-                                <form class="row contact_form" action="" method="POST" novalidate="novalidate">
-                                    <div class="col-md-12 form-group p_star">
-                                        <input type="text" class="form-control" id="username" name="username"
-                                            placeholder="Username">
-                                    </div>
-                                    <div class="col-md-12 form-group p_star">
-                                        <input type="password" class="form-control" id="password" name="password"
-                                            placeholder="Password">
-                                    </div>
-                                    <div class="col-md-12 form-group">
-                                        <button type="submit" value="submit" class="btn_3">
-                                            log in
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!--================login_part end =================-->
     </section>
+    <!-- Breadcrumb Section End -->
+
+    <!-- Checkout Section Begin -->
+    <nav class="checkout spad">
+        <div class="container">
+            <div class="checkout__form">
+                <form id="profile-form" action="update-profile.php" method="post" class="needs-validation" novalidate onsubmit="return validateForm()">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-6">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>First Name<span>*</span></p>
+                                        <input type="text" name="first_name" class="form-control" value="<?php echo htmlspecialchars($firstName); ?>" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Last Name<span>*</span></p>
+                                        <input type="text" name="last_name" class="form-control" value="<?php echo htmlspecialchars($lastName); ?>" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Username<span>*</span></p>
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($user['USERNAME']); ?>" disabled>
+                                        <input type="hidden" name="username" value="<?php echo htmlspecialchars($user['USERNAME']); ?>" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Password<span>*</span></p>
+                                        <input type="password" name="current_password" class="form-control" placeholder="Enter current password" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>New Password</p>
+                                        <input type="password" name="new_password" class="form-control" placeholder="Enter new password">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Confirm Password</p>
+                                        <input type="password" name="confirm_password" class="form-control" placeholder="Confirm new password">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Phone<span>*</span></p>
+                                        <input type="text" name="phone" class="form-control" value="<?php echo htmlspecialchars($user['PHONE']); ?>" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="checkout__input">
+                                        <p>Email<span>*</span></p>
+                                        <input type="email" name="email" class="form-control" value="<?php echo htmlspecialchars($user['EMAIL']); ?>" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="checkout__input">
+                                <p>Address<span>*</span></p>
+                                <input type="text" name="address" class="form-control" value="<?php echo htmlspecialchars($user['ADDRESS']); ?>" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-6">
+                                    <div class="row justify-content-center">
+                                        <div class="col-lg-4">
+                                            <div class="d-flex justify-content-center">
+                                                <button type="submit" class="primary-btn">Save Changes</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="checkout__order">
+                                <h4 class="order__title">Your Infomation</h4>
+                                <ul class="checkout__total__products">
+                                    <li>Name: <span><?php echo htmlspecialchars($user['NAME']); ?></span></li>
+                                    <li>Username: <span><?php echo htmlspecialchars($user['USERNAME']); ?></span></li>
+                                    <li>Phone: <span><?php echo htmlspecialchars($user['PHONE']); ?></span></li>
+                                    <li>Email: <span><?php echo htmlspecialchars($user['EMAIL']); ?></span></li>
+                                    <li>Address: <span><?php echo htmlspecialchars($user['ADDRESS']); ?></span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <!-- Checkout Section End -->
 
     <!-- Footer Section Begin -->
     <footer class="footer">
@@ -319,9 +351,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <p>Copyright ©
                             <script>
                                 document.write(new Date().getFullYear());
-                            </script>2020
-                            All rights reserved | This template is made with <i class="fa fa-heart-o"
-                                aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                            </script> |
+                            All rights reserved | This template is made with
+                            <i class="fa fa-heart-o" aria-hidden="true"></i>
+                            by
+                            <a href="https://colorlib.com" target="_blank">Colorlib</a>
                         </p>
                         <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                     </div>
@@ -344,32 +378,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="js/main.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        // Hiển thị thông báo nếu có
-        <?php if ($redirect): ?>
-            // Hiển thị thông báo đăng nhập thành công
-            Toastify({
-                text: "Đăng nhập thành công!",
-                duration: 3000,
-                gravity: 'top',
-                position: 'right',
-                backgroundColor: '#28a745', // Màu xanh cho thành công
-            }).showToast();
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch('update-profile.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    Toastify({
+                        text: data.message,
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: data.status === 'success' ? '#28a745' : '#ff5f6d',
+                    }).showToast();
+                })
+                .catch(error => {
+                    Toastify({
+                        text: 'Có lỗi xảy ra, vui lòng thử lại.',
+                        duration: 3000,
+                        gravity: 'top',
+                        position: 'right',
+                        backgroundColor: '#ff5f6d',
+                    }).showToast();
+                });
+        });
 
-            // Chuyển hướng sau 2 giây
-            setTimeout(function() {
-                window.location.href = "<?php echo $redirect_url; ?>"; // Sử dụng URL tương ứng
-            }, 2000);
-        <?php endif; ?>
-
-        <?php if ($message): ?>
-            Toastify({
-                text: "<?php echo $message; ?>",
-                duration: 3000,
-                gravity: 'top',
-                position: 'right',
-                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Màu cho thông báo lỗi
-            }).showToast();
-        <?php endif; ?>
+        function validateForm() {
+            let isValid = true;
+            const inputs = document.querySelectorAll('.checkout__input input');
+            inputs.forEach(input => {
+                if (input.required && !input.value) {
+                    isValid = false;
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+            return isValid;
+        }
     </script>
 </body>
 

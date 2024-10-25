@@ -73,7 +73,7 @@ if (isset($_GET['id'])) {
                 <?php if ($username): ?>
                     <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
                 <?php else: ?>
-                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                    <a href="login-male.php">Sign in</a>
                 <?php endif; ?>
                 <a href="#">FAQs</a>
             </div>
@@ -113,9 +113,15 @@ if (isset($_GET['id'])) {
                         <div class="header__top__right">
                             <div class="header__top__links">
                                 <?php if ($username): ?>
-                                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                    <div class="dropdown">
+                                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                        <ul class="dropdown-content">
+                                            <li><a href="profile.php">Profile</a></li>
+                                            <li><a href="logout.php">Logout</a></li>
+                                        </ul>
+                                    </div>
                                 <?php else: ?>
-                                    <a href="../malefashion-master/login-male.php">Sign in</a>
+                                    <a href="login-male.php">Sign in</a>
                                 <?php endif; ?>
                                 <a href="#">FAQs</a>
                             </div>

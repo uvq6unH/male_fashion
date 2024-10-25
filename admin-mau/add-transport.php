@@ -397,18 +397,18 @@ $conn->close();
                                         <thead>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Name</th>
-                                                <th>Notes</th>
-                                                <th>Is Active</th>
+                                                <th>NAME</th>
+                                                <th>NOTES</th>
+                                                <th>IS ACTIVE</th>
                                                 <th>ADD</th>
                                             </tr>
                                         </thead>
                                         <tfoot>
                                             <tr>
                                                 <th>ID</th>
-                                                <th>Name</th>
-                                                <th>Notes</th>
-                                                <th>Is Active</th>
+                                                <th>NAME</th>
+                                                <th>NOTES</th>
+                                                <th>IS ACTIVE</th>
                                                 <th>ADD</th>
                                             </tr>
                                         </tfoot>
@@ -416,7 +416,7 @@ $conn->close();
                                             <tr>
                                                 <td><input class="form-control" type="number" name="id" required></td>
                                                 <td><input class="form-control" type="text" name="name" required></td>
-                                                <td><textarea class="form-control" name="notes"></textarea></td>
+                                                <td><input class="form-control" type="text" name="notes" required></input></td>
                                                 <td>
                                                     <select class="form-select form-select-sm" name="isactive" required>
                                                         <option value="1">Yes</option>
@@ -446,7 +446,7 @@ $conn->close();
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; Male Fashion</span>
                     </div>
                 </div>
             </footer>

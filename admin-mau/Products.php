@@ -365,31 +365,31 @@ $result = $conn->query($sql);
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Name</th>
-                                            <th>Image</th>
-                                            <th>Category ID</th>
-                                            <th>Price</th>
-                                            <th>Description</th>
-                                            <th>Quantity</th>
-                                            <th>Rating</th>
-                                            <th>Is Active</th>
-                                            <th>Update</th>
-                                            <th>Delete</th>
+                                            <th>NAME</th>
+                                            <th>IMAGE</th>
+                                            <th>CATEGORY ID</th>
+                                            <th>PRICE</th>
+                                            <th>DESCRIPTION</th>
+                                            <th>QUANTITY</th>
+                                            <th>RATING</th>
+                                            <th>IS ACTIVE</th>
+                                            <th>UPDATE</th>
+                                            <th>DELETE</th>
                                         </tr>
                                     </thead>
                                     <tfoot>
                                         <tr>
                                             <th>ID</th>
-                                            <th>Name</th>
-                                            <th>Image</th>
-                                            <th>Category ID</th>
-                                            <th>Price</th>
-                                            <th>Description</th>
-                                            <th>Quantity</th>
-                                            <th>Rating</th>
-                                            <th>Is Active</th>
-                                            <th>Update</th>
-                                            <th>Delete</th>
+                                            <th>NAME</th>
+                                            <th>IMAGE</th>
+                                            <th>CATEGORY ID</th>
+                                            <th>PRICE</th>
+                                            <th>DESCRIPTION</th>
+                                            <th>QUANTITY</th>
+                                            <th>RATING</th>
+                                            <th>IS ACTIVE</th>
+                                            <th>UPDATE</th>
+                                            <th>DELETE</th>
                                         </tr>
                                     </tfoot>
                                     <tbody>
@@ -431,7 +431,7 @@ $result = $conn->query($sql);
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; Male Fashion</span>
                     </div>
                 </div>
             </footer>

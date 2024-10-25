@@ -402,29 +402,29 @@ $conn->close();
                                         </div>
                                         <thead>
                                             <tr>
-                                                <th>Payment ID</th>
-                                                <th>Transport ID</th>
-                                                <th>Order Date</th>
-                                                <th>User ID</th>
-                                                <th>Total Money</th>
-                                                <th>Notes</th>
-                                                <th>Recipient Name</th>
-                                                <th>Address</th>
-                                                <th>Phone</th>
+                                                <th>PAYMENT ID</th>
+                                                <th>TRANSPORT ID</th>
+                                                <th>ORDER DATE</th>
+                                                <th>USER ID</th>
+                                                <th>TOTAL MONEY</th>
+                                                <th>NOTES</th>
+                                                <th>RECIPIENT NAME</th>
+                                                <th>ADDRESS</th>
+                                                <th>PHONE</th>
                                                 <th>ADD</th>
                                             </tr>
                                         </thead>
                                         <tfoot>
                                             <tr>
-                                                <th>Payment ID</th>
-                                                <th>Transport ID</th>
-                                                <th>Order Date</th>
-                                                <th>User ID</th>
-                                                <th>Total Money</th>
-                                                <th>Notes</th>
-                                                <th>Recipient Name</th>
-                                                <th>Address</th>
-                                                <th>Phone</th>
+                                                <th>PAYMENT ID</th>
+                                                <th>TRANSPORT ID</th>
+                                                <th>ORDER DATE</th>
+                                                <th>USER ID</th>
+                                                <th>TOTAL MONEY</th>
+                                                <th>NOTES</th>
+                                                <th>RECIPIENT NAME</th>
+                                                <th>ADDRESS</th>
+                                                <th>PHONE</th>
                                                 <th>ADD</th>
                                             </tr>
                                         </tfoot>
@@ -461,7 +461,7 @@ $conn->close();
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; Male Fashion</span>
                     </div>
                 </div>
             </footer>

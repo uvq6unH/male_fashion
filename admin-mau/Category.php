@@ -396,8 +396,8 @@ $result = $conn->query($sql);
                                                 echo "<td>{$row['QUANTITY']}</td>";
                                                 echo "<td><img src='../img/product/{$row['IMAGE']}' alt='Category Image' style='width: 125px; height: auto;'></td>"; // Adjust image display as needed
                                                 echo "<td>" . ($row['ISACTIVE'] ? 'Yes' : 'No') . "</td>";
-                                                echo "<td><a href='update_category.php?id={$row['ID']}' class='btn btn-outline-warning btn-sm'>Update</a></td>";
-                                                echo "<td><a href='delete_category.php?id={$row['ID']}' class='btn btn-outline-danger btn-sm'>Delete</a></td>";
+                                                echo "<td><a href='update-category.php?id={$row['ID']}' class='btn btn-outline-warning btn-sm'>Update</a></td>";
+                                                echo "<td><a href='delete-category.php?id={$row['ID']}' class='btn btn-outline-danger btn-sm'>Delete</a></td>";
                                                 echo "</tr>";
                                             }
                                         } else {
@@ -422,7 +422,7 @@ $result = $conn->query($sql);
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; Male Fashion</span>
                     </div>
                 </div>
             </footer>

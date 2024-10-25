@@ -404,13 +404,13 @@ $result = $conn->query($sql);
                                                 echo "<td>{$row['IDTRANSPORT']}</td>";
                                                 echo "<td>{$row['ORDERS_DATE']}</td>";
                                                 echo "<td>{$row['IDUSER']}</td>";
-                                                echo "<td>{$row['TOTAL_MONEY']}</td>";
+                                                echo "<td>$" . number_format($row['TOTAL_MONEY'], 2) . "</td>";
                                                 echo "<td>{$row['NOTES']}</td>";
                                                 echo "<td>{$row['RECIPIENT_NAME']}</td>";
                                                 echo "<td>{$row['ADDRESS']}</td>";
                                                 echo "<td>{$row['PHONE']}</td>";
-                                                echo "<td><a href='update-payment.php?id={$row['ID']}' class='btn btn-outline-warning btn-sm'>Update</a></td>";
-                                                echo "<td><a href='delete-payment.php?id={$row['ID']}' class='btn btn-outline-danger btn-sm'>Delete</a></td>";
+                                                echo "<td><a href='update-orders.php?id={$row['ID']}' class='btn btn-outline-warning btn-sm'>Update</a></td>";
+                                                echo "<td><a href='delete-orders.php?id={$row['ID']}' class='btn btn-outline-danger btn-sm'>Delete</a></td>";
                                                 echo "</tr>";
                                             }
                                         } else {
@@ -434,7 +434,7 @@ $result = $conn->query($sql);
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
                     <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
+                        <span>Copyright &copy; Male Fashion</span>
                     </div>
                 </div>
             </footer>

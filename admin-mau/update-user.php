@@ -2,10 +2,43 @@
 include('../auth.php');
 include('../db.php');
 
-// Fetch transport methods from the database
-$sql = "SELECT ID, NAME, NOTES, CREATED_DATE, UPDATED_DATE, ISACTIVE FROM transport_method";
-$result = $conn->query($sql);
+$message = '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
+    $id = $_POST['id'];
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $password = $_POST['password']; // Directly using the password
+    $role = $_POST['role'];
+    $isactive = isset($_POST['isactive']) ? $_POST['isactive'] : 0;
+
+    $sql = "UPDATE user SET NAME = ?, EMAIL = ?, PASSWORD = ?, ROLE = ?, ISACTIVE = ? WHERE ID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ssssii", $name, $email, $password, $role, $isactive, $id);
+
+    if (!$stmt->execute()) {
+        $message = 'Execute failed: (' . $stmt->errno . ') ' . $stmt->error;
+    } else {
+        $message = 'User updated successfully!';
+    }
+
+    $stmt->close();
+}
+
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $sql = "SELECT NAME, EMAIL, PASSWORD, ROLE, ISACTIVE FROM user WHERE ID = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+}
+
+$conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,10 +50,8 @@ $result = $conn->query($sql);
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Admin | Transports</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-        integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Admin | User</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Custom fonts for this template -->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -33,6 +64,7 @@ $result = $conn->query($sql);
 
     <!-- Custom styles for this page -->
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
 </head>
 
@@ -45,8 +77,8 @@ $result = $conn->query($sql);
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="../index.php"><img
-                    src="../img/logo.png" alt="">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="../index.php"><img src="../img/logo.png"
+                    alt="">
             </a>
 
             <!-- Divider -->
@@ -125,10 +157,8 @@ $result = $conn->query($sql);
             <!-- Sidebar Message -->
             <div class="sidebar-card d-none d-lg-flex">
                 <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
-                <p class="text-center mb-2"><strong>SB Admin Pro</strong> is packed with premium features, components,
-                    and more!</p>
-                <a class="btn btn-success btn-sm" href="https://startbootstrap.com/theme/sb-admin-pro">Upgrade to
-                    Pro!</a>
+                <p class="text-center mb-2"><strong>SB Admin Pro</strong> is packed with premium features, components, and more!</p>
+                <a class="btn btn-success btn-sm" href="https://startbootstrap.com/theme/sb-admin-pro">Upgrade to Pro!</a>
             </div>
 
         </ul>
@@ -258,7 +288,8 @@ $result = $conn->query($sql);
                                 </h6>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_1.svg" alt="...">
+                                        <img class="rounded-circle" src="img/undraw_profile_1.svg"
+                                            alt="...">
                                         <div class="status-indicator bg-success"></div>
                                     </div>
                                     <div class="font-weight-bold">
@@ -269,7 +300,8 @@ $result = $conn->query($sql);
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_2.svg" alt="...">
+                                        <img class="rounded-circle" src="img/undraw_profile_2.svg"
+                                            alt="...">
                                         <div class="status-indicator"></div>
                                     </div>
                                     <div>
@@ -280,7 +312,8 @@ $result = $conn->query($sql);
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_3.svg" alt="...">
+                                        <img class="rounded-circle" src="img/undraw_profile_3.svg"
+                                            alt="...">
                                         <div class="status-indicator bg-warning"></div>
                                     </div>
                                     <div>
@@ -312,7 +345,8 @@ $result = $conn->query($sql);
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">Douglas McGee</span>
-                                <img class="img-profile rounded-circle" src="img/undraw_profile.svg">
+                                <img class="img-profile rounded-circle"
+                                    src="img/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -348,70 +382,60 @@ $result = $conn->query($sql);
                     <!-- Page Heading -->
                     <h1 class="h3 mb-2 text-gray-800">Tables</h1>
 
+
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Transport Table</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Users Table</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                    <div class="add-button">
-                                        <a href="add-transport.php">
-                                            Add Transport Method
-                                            <i class="fa-solid fa-circle-plus"></i>
-                                        </a>
-                                    </div>
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>NAME</th>
-                                            <th>NOTES</th>
-                                            <th>CREATED DATE</th>
-                                            <th>UPDATED DTAE</th>
-                                            <th>IS ACTIVE</th>
-                                            <th>UPDATE</th>
-                                            <th>DELETE</th>
-                                        </tr>
-                                    </thead>
-                                    <tfoot>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>NAME</th>
-                                            <th>NOTES</th>
-                                            <th>CREATED DATE</th>
-                                            <th>UPDATED DTAE</th>
-                                            <th>IS ACTIVE</th>
-                                            <th>UPDATE</th>
-                                            <th>DELETE</th>
-                                        </tr>
-                                    </tfoot>
-                                    <tbody>
-                                        <?php
-                                        if ($result->num_rows > 0) {
-                                            while ($row = $result->fetch_assoc()) {
-                                                echo "<tr>";
-                                                echo "<td>{$row['ID']}</td>";
-                                                echo "<td>{$row['NAME']}</td>";
-                                                echo "<td>{$row['NOTES']}</td>";
-                                                echo "<td>{$row['CREATED_DATE']}</td>";
-                                                echo "<td>{$row['UPDATED_DATE']}</td>";
-                                                echo "<td>" . ($row['ISACTIVE'] ? 'Yes' : 'No') . "</td>";
-                                                echo "<td><a href='update-transport.php?id={$row['ID']}' class='btn btn-outline-warning btn-sm'>Update</a></td>";
-                                                echo "<td><a href='delete-transport.php?id={$row['ID']}' class='btn btn-outline-danger btn-sm'>Delete</a></td>";
-                                                echo "</tr>";
-                                            }
-                                        } else {
-                                            echo "<tr><td colspan='8'>No transport methods found</td></tr>";
-                                        }
-                                        $conn->close();
-                                        ?>
-                                    </tbody>
-                                </table>
+                                <form method="POST" action="">
+                                    <div class="add-button mb-3"><a href="Users.php">Users<i class="fa-solid fa-folder-open"></i></a></div>
+                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>NAME</th>
+                                                <th>EMAIL</th>
+                                                <th>PASSWORD</th>
+                                                <th>ROLE</th>
+                                                <th>ISACTIVE</th>
+                                                <th>UPDATE</th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>NAME</th>
+                                                <th>EMAIL</th>
+                                                <th>PASSWORD</th>
+                                                <th>ROLE</th>
+                                                <th>ISACTIVE</th>
+                                                <th>UPDATE</th>
+                                            </tr>
+                                        </tfoot>
+                                        <tbody>
+                                            <tr>
+                                                <td><input class="form-control" type="text" name="id" value="<?php echo htmlspecialchars($id); ?>" readonly></td>
+                                                <td><input class="form-control" type="text" name="name" value="<?php echo htmlspecialchars($user['NAME']); ?>" required></td>
+                                                <td><input class="form-control" type="email" name="email" value="<?php echo htmlspecialchars($user['EMAIL']); ?>" required></td>
+                                                <td><input class="form-control" type="password" name="password" required></td>
+                                                <td><input class="form-control" type="text" name="role" value="<?php echo htmlspecialchars($user['ROLE']); ?>" required></td>
+                                                <td>
+                                                    <select class="form-select form-select-sm" name="isactive" required>
+                                                        <option value="1" <?php echo $user['ISACTIVE'] ? 'selected' : ''; ?>>Yes</option>
+                                                        <option value="0" <?php echo !$user['ISACTIVE'] ? 'selected' : ''; ?>>No</option>
+                                                    </select>
+                                                </td>
+                                                <td><button type="submit" name="submit" class="btn btn-outline-success">Update User</button></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
                             </div>
                         </div>
                     </div>
-
                 </div>
                 <!-- /.container-fluid -->
 
@@ -475,6 +499,34 @@ $result = $conn->query($sql);
 
     <!-- Page level custom scripts -->
     <script src="js/demo/datatables-demo.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script>
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.right = '20px';
+            toast.style.padding = '10px 20px';
+            toast.style.backgroundColor = '#333';
+            toast.style.color = '#fff';
+            toast.style.borderRadius = '5px';
+            toast.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.1)';
+            toast.innerText = message;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => document.body.removeChild(toast), 500);
+            }, 3000);
+        }
+
+        window.onload = function() {
+            <?php if (!empty($message)) : ?>
+                showToast("<?php echo $message; ?>");
+            <?php endif; ?>
+        };
+    </script>
 
 </body>
 
