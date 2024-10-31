@@ -157,7 +157,7 @@ $checkResult = $stmt->get_result();
                             <div class="header__top__links">
                                 <?php if ($username): ?>
                                     <div class="dropdown">
-                                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                        <a><?php echo htmlspecialchars($username); ?></a>
                                         <ul class="dropdown-content">
                                             <li><a href="profile.php">Profile</a></li>
                                             <li><a href="logout.php">Logout</a></li>
@@ -230,10 +230,11 @@ $checkResult = $stmt->get_result();
             <div class="row">
                 <div class="col-lg-12">
                     <div class="breadcrumb__text">
-                        <h4>Shop</h4>
+                        <h4>Checkout</h4>
                         <div class="breadcrumb__links">
                             <a href="./index.php">Home</a>
-                            <span>Shop</span>
+                            <a href="./shop.php">Shop</a>
+                            <span>Checkout</span>
                         </div>
                     </div>
                 </div>
@@ -332,7 +333,7 @@ $checkResult = $stmt->get_result();
         </div>
     </section>
     <!-- Checkout Section End -->
-     
+
     <!-- Modal for Place Order -->
     <div class="modal fade" id="placeOrderModal" tabindex="-1" role="dialog" aria-labelledby="placeOrderLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -500,7 +501,7 @@ $checkResult = $stmt->get_result();
                         <p>Copyright ©
                             <script>
                                 document.write(new Date().getFullYear());
-                            </script>2020
+                            </script>
                             All rights reserved | This template is made with <i class="fa fa-heart-o"
                                 aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
                         </p>

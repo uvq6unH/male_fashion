@@ -129,17 +129,21 @@ section.breadcrumb-blog {
 	margin-top: 130px;
 }
 
+section.modal-content {
+	margin-top: 160px;
+	position  : relative;
+}
+
 section.map {
+	margin-top: 130px;
+}
+
+section.hero {
 	margin-top: 130px;
 }
 
 section.shop-details {
 	margin-top: 130px;
-}
-
-section.modal-content {
-	margin-top: 160px;
-	position  : relative;
 }
 
 .section-title {
@@ -357,7 +361,7 @@ section.modal-content {
 	top       : 0px;
 	left      : 0;
 	width     : 100%;
-	z-index   : 5;
+	z-index   : 10;
 }
 
 .header__top {
@@ -1169,9 +1173,9 @@ section.modal-content {
 }
 
 .product__item__text .rating i {
-	font-size      : 14px;
-	color          : #b7b7b7;
-	/* margin-right: -5px; */
+	font-size   : 14px;
+	color       : #f7941d;
+	margin-right: 5px;
 }
 
 .product__item__text h5 {

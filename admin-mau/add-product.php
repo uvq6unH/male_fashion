@@ -1,24 +1,21 @@
 <?php
-// Existing initial configurations
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 include('../auth.php');
 include('../db.php');
 
 $message = '';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Gather form inputs
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
+    // Lấy dữ liệu từ form
     $name = $_POST['name'];
     $idcategory = $_POST['idcategory'];
     $price = $_POST['price'];
     $description = $_POST['description'];
     $quantity = $_POST['quantity'];
     $rating = $_POST['rating'];
-    $isactive = isset($_POST['isactive']) ? 1 : 0;
+    $isactive = $_POST['isactive'];
+    $sale = rand(0, 100); // Giá trị ngẫu nhiên cho cột Sale
 
-    // Image upload section similar to add-category.php
+    // Xử lý ảnh tải lên
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $upload_dir = __DIR__ . '/../img/product/';
         if (!is_dir($upload_dir)) {
@@ -28,41 +25,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $image_name = basename($_FILES['image']['name']);
         $image_path = $upload_dir . $image_name;
 
-        $imageFileType = strtolower(pathinfo($image_path, PATHINFO_EXTENSION));
-        $check = getimagesize($_FILES['image']['tmp_name']);
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
+            // Thêm sản phẩm mới vào database với `NewArrivals` là 1
+            $sql_insert = "INSERT INTO product (NAME, IMAGE, IDCATEGORY, PRICE, DESCRIPTION, QUANTITY, RATING, ISACTIVE, NewArrivals, Sale) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)";
+            $stmt_insert = $conn->prepare($sql_insert);
+            $stmt_insert->bind_param("ssidsiidi", $name, $image_name, $idcategory, $price, $description, $quantity, $rating, $isactive, $sale);
 
-        if ($check !== false) {
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
-                if (!empty($name) && !empty($idcategory) && !empty($price) && !empty($quantity)) {
-                    $sql = "INSERT INTO product (NAME, IMAGE, IDCATEGORY, PRICE, DESCRIPTION, QUANTITY, RATING, ISACTIVE) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            if ($stmt_insert->execute()) {
+                $message = 'Sản phẩm mới đã được thêm thành công!';
 
-                    $stmt = $conn->prepare($sql);
-                    $stmt->bind_param("ssidsiid", $name, $image_name, $idcategory, $price, $description, $quantity, $rating, $isactive);
-
-                    if ($stmt->execute()) {
-                        $message = 'New product added successfully!';
-                    } else {
-                        $message = 'Error: ' . $stmt->error;
-                    }
-
-                    // Close statement
-                    $stmt->close();
-                } else {
-                    $message = 'Please fill in all required fields.';
-                }
+                // Chỉ giữ lại 8 sản phẩm mới nhất có `NewArrivals = 1`
+                $sql_update = "UPDATE product SET NewArrivals = 0 WHERE ID NOT IN (
+                    SELECT ID FROM (SELECT ID FROM product ORDER BY ID DESC LIMIT 8) AS temp
+                )";
+                $conn->query($sql_update);
             } else {
-                $message = "Error moving uploaded file. Error code: " . $_FILES['image']['error'];
+                $message = 'Lỗi: ' . $stmt_insert->error;
             }
+
+            $stmt_insert->close();
         } else {
-            $message = 'File is not an image.';
+            $message = "Lỗi khi tải lên ảnh. Mã lỗi: " . $_FILES['image']['error'];
         }
     } else {
-        $message = 'Please select an image to upload.';
+        $message = 'Vui lòng chọn một ảnh để tải lên.';
     }
 }
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">

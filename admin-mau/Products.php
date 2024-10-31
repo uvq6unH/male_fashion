@@ -3,7 +3,7 @@ include('../auth.php');
 include('../db.php');
 
 // Fetch products from the database
-$sql = "SELECT ID, NAME, IMAGE, IDCATEGORY, PRICE, DESCRIPTION, QUANTITY, RATING, ISACTIVE FROM product";
+$sql = "SELECT ID, NAME, IMAGE, IDCATEGORY, PRICE, DESCRIPTION, QUANTITY, RATING, ISACTIVE, NewArrivals, Sale FROM product";
 $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
@@ -373,6 +373,8 @@ $result = $conn->query($sql);
                                             <th>QUANTITY</th>
                                             <th>RATING</th>
                                             <th>IS ACTIVE</th>
+                                            <th>NEW ARRIVALS</th>
+                                            <th>SALE</th>
                                             <th>UPDATE</th>
                                             <th>DELETE</th>
                                         </tr>
@@ -388,6 +390,8 @@ $result = $conn->query($sql);
                                             <th>QUANTITY</th>
                                             <th>RATING</th>
                                             <th>IS ACTIVE</th>
+                                            <th>NEW ARRIVALS</th>
+                                            <th>SALE</th>
                                             <th>UPDATE</th>
                                             <th>DELETE</th>
                                         </tr>
@@ -402,10 +406,12 @@ $result = $conn->query($sql);
                                                 echo "<td><img src='../img/product/{$row['IMAGE']}' alt='Product Image' style='width: 125px; height: auto;'></td>";
                                                 echo "<td>{$row['IDCATEGORY']}</td>";
                                                 echo "<td>{$row['PRICE']}</td>";
-                                                echo "<td>{$row['DESCRIPTION']}</td>";
+                                                echo "<td>" . (strlen($row['DESCRIPTION']) > 50 ? substr($row['DESCRIPTION'], 0, 50) . '...' : $row['DESCRIPTION']) . "</td>";
                                                 echo "<td>{$row['QUANTITY']}</td>";
                                                 echo "<td>{$row['RATING']}</td>";
                                                 echo "<td>" . ($row['ISACTIVE'] ? 'Yes' : 'No') . "</td>";
+                                                echo "<td>" . ($row['NewArrivals'] ? 'Yes' : 'No') . "</td>";
+                                                echo "<td>{$row['Sale']}%</td>";
                                                 echo "<td><a href='update-product.php?id={$row['ID']}' class='btn btn-outline-warning btn-sm'>Update</a></td>";
                                                 echo "<td><a href='delete-product.php?id={$row['ID']}' class='btn btn-outline-danger btn-sm'>Delete</a></td>";
                                                 echo "</tr>";

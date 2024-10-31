@@ -13,7 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     $quantity = $_POST['quantity'];
     $rating = $_POST['rating'];
     $isactive = $_POST['isactive'];
+    $sale = $_POST['sale']; // Giá trị Sale từ form, cho phép quản trị viên nhập tay
 
+    // Xử lý ảnh nếu có cập nhật ảnh mới
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $upload_dir = __DIR__ . '/../img/product/';
         if (!is_dir($upload_dir)) {
@@ -23,41 +25,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
         $image_name = basename($_FILES['image']['name']);
         $image_path = $upload_dir . $image_name;
 
-        $sql = "SELECT IMAGE FROM product WHERE ID = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $product = $result->fetch_assoc();
-        $current_image = $product['IMAGE'];
-        $stmt->close();
-
-        if ($current_image === $image_name) {
-            $current_image_path = $upload_dir . $current_image;
-            if (file_exists($current_image_path)) {
-                if (!unlink($current_image_path)) {
-                    $message = "Không thể xóa file ảnh cũ.";
-                }
-            }
-        }
-
         if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
-            $sql = "UPDATE product SET NAME = ?, IDCATEGORY = ?, PRICE = ?, DESCRIPTION = ?, QUANTITY = ?, IMAGE = ?, RATING = ?, ISACTIVE = ? WHERE ID = ?";
+            // Cập nhật sản phẩm kèm ảnh mới
+            $sql = "UPDATE product SET NAME = ?, IDCATEGORY = ?, PRICE = ?, DESCRIPTION = ?, QUANTITY = ?, IMAGE = ?, RATING = ?, ISACTIVE = ?, Sale = ? WHERE ID = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sidsisdii", $name, $idcategory, $price, $description, $quantity, $image_name, $rating, $isactive, $id);
+            $stmt->bind_param("sidsiisiii", $name, $idcategory, $price, $description, $quantity, $image_name, $rating, $isactive, $sale, $id);
         } else {
-            $message = "Error uploading image.";
+            $message = "Lỗi khi tải lên ảnh.";
         }
     } else {
-        $sql = "UPDATE product SET NAME = ?, IDCATEGORY = ?, PRICE = ?, DESCRIPTION = ?, QUANTITY = ?, RATING = ?, ISACTIVE = ? WHERE ID = ?";
+        // Cập nhật sản phẩm mà không thay đổi ảnh
+        $sql = "UPDATE product SET NAME = ?, IDCATEGORY = ?, PRICE = ?, DESCRIPTION = ?, QUANTITY = ?, RATING = ?, ISACTIVE = ?, Sale = ? WHERE ID = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sidsidii", $name, $idcategory, $price, $description, $quantity, $rating, $isactive, $id);
+        $stmt->bind_param("sidsiidii", $name, $idcategory, $price, $description, $quantity, $rating, $isactive, $sale, $id);
     }
 
-    if (!$stmt->execute()) {
-        $message = 'Execute failed: (' . $stmt->errno . ') ' . $stmt->error;
+    if ($stmt->execute()) {
+        $message = 'Sản phẩm đã được cập nhật thành công!';
+
+        // Cập nhật để giữ lại tối đa 8 sản phẩm mới nhất có `NewArrivals = 1`
+        $sql_update = "UPDATE product SET NewArrivals = 0 WHERE ID NOT IN (
+            SELECT ID FROM (SELECT ID FROM product ORDER BY ID DESC LIMIT 8) AS temp
+        )";
+        $conn->query($sql_update);
     } else {
-        $message = 'Product updated successfully!';
+        $message = 'Lỗi khi cập nhật sản phẩm: ' . $stmt->error;
     }
 
     $stmt->close();
@@ -65,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    $sql = "SELECT NAME, IDCATEGORY, PRICE, DESCRIPTION, QUANTITY, IMAGE, RATING, ISACTIVE FROM product WHERE ID = ?";
+    $sql = "SELECT * FROM product WHERE ID = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -76,6 +68,7 @@ if (isset($_GET['id'])) {
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -446,7 +439,8 @@ $conn->close();
                                                 <th>QUANTITY</th>
                                                 <th>IMAGE</th>
                                                 <th>RATING</th>
-                                                <th>ISACTIVE</th>
+                                                <th>IS ACTIVE</th>
+                                                <th>SALE</th>
                                                 <th>UPDATE</th>
                                             </tr>
                                         </thead>
@@ -460,7 +454,8 @@ $conn->close();
                                                 <th>QUANTITY</th>
                                                 <th>IMAGE</th>
                                                 <th>RATING</th>
-                                                <th>ISACTIVE</th>
+                                                <th>IS ACTIVE</th>
+                                                <th>SALE</th>
                                                 <th>UPDATE</th>
                                             </tr>
                                         </tfoot>
@@ -495,6 +490,9 @@ $conn->close();
                                                         <option value="1" <?php echo $product['ISACTIVE'] ? 'selected' : ''; ?>>Yes</option>
                                                         <option value="0" <?php echo !$product['ISACTIVE'] ? 'selected' : ''; ?>>No</option>
                                                     </select>
+                                                </td>
+                                                <td>
+                                                    <input class="form-control" type="number" name="sale" value="<?php echo htmlspecialchars($product['Sale']); ?>" min="0" max="100" required>
                                                 </td>
                                                 <td>
                                                     <button type="submit" name="submit" class="btn btn-outline-success">

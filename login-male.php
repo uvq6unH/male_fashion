@@ -138,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="header__top__links">
                                 <?php if ($username): ?>
                                     <div class="dropdown">
-                                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                        <a><?php echo htmlspecialchars($username); ?></a>
                                         <ul class="dropdown-content">
                                             <li><a href="profile.php">Profile</a></li>
                                             <li><a href="logout.php">Logout</a></li>
@@ -319,7 +319,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <p>Copyright ©
                             <script>
                                 document.write(new Date().getFullYear());
-                            </script>2020
+                            </script>
                             All rights reserved | This template is made with <i class="fa fa-heart-o"
                                 aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
                         </p>

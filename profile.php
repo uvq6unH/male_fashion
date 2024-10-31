@@ -112,7 +112,7 @@ $conn->close();
                             <div class="header__top__links">
                                 <?php if ($username): ?>
                                     <div class="dropdown">
-                                        <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
+                                        <a><?php echo htmlspecialchars($username); ?></a>
                                         <ul class="dropdown-content">
                                             <li><a href="profile.php">Profile</a></li>
                                             <li><a href="logout.php">Logout</a></li>
@@ -287,6 +287,9 @@ $conn->close();
                                     <li>Email: <span><?php echo htmlspecialchars($user['EMAIL']); ?></span></li>
                                     <li>Address: <span><?php echo htmlspecialchars($user['ADDRESS']); ?></span></li>
                                 </ul>
+                                <div class="d-flex justify-content-center">
+                                    <a class="primary-btn">Admin</a>
+                                </div>
                             </div>
                         </div>
                     </div>
