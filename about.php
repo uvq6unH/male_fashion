@@ -364,10 +364,11 @@ include 'db.php'; // Kết nối cơ sở dữ liệu
     <!-- Client Section End -->
 
     <!-- Footer Section Begin -->
+
     <footer class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-6 col-sm-6">
                     <div class="footer__about">
                         <div class="footer__logo">
                             <a href="#"><img src="img/footer-logo.png" alt=""></a>
@@ -378,27 +379,38 @@ include 'db.php'; // Kết nối cơ sở dữ liệu
                 </div>
                 <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Leader</h6>
                         <ul>
-                            <li><a href="#">Clothing Store</a></li>
-                            <li><a href="#">Trending Shoes</a></li>
-                            <li><a href="#">Accessories</a></li>
-                            <li><a href="#">Sale</a></li>
+                            <li><a href="#">Nguyễn Tuấn Hưng</a></li>
+                            <li><a href="#">04-01-2003</a></li>
+                            <li><a href="#">21103100251</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Member</h6>
                         <ul>
-                            <li><a href="#">Contact Us</a></li>
-                            <li><a href="#">Payment Methods</a></li>
-                            <li><a href="#">Delivary</a></li>
-                            <li><a href="#">Return & Exchanges</a></li>
+                            <li><a href="#">Nguyễn Dương Ninh</a></li>
+                            <li><a href="#">04-03-2003</a></li>
+                            <li><a href="#">21103100262</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-lg-3 offset-lg-1 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <div class="footer__widget">
+                        <h6>Member</h6>
+                        <ul>
+                            <li><a href="#">Nguyễn Anh Huy</a></li>
+                            <li><a href="#">12-11-2003</a></li>
+                            <li><a href="#">21103100270</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-2 offset-lg-1 col-md-6 col-sm-6">
                     <div class="footer__widget">
                         <h6>NewLetter</h6>
                         <div class="footer__newslatter">
@@ -418,9 +430,11 @@ include 'db.php'; // Kết nối cơ sở dữ liệu
                         <p>Copyright ©
                             <script>
                                 document.write(new Date().getFullYear());
-                            </script>
-                            All rights reserved | This template is made with <i class="fa fa-heart-o"
-                                aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                            </script> |
+                            All rights reserved | This template is made with
+                            <i class="fa fa-heart-o" aria-hidden="true"></i>
+                            by
+                            <a href="https://colorlib.com" target="_blank">Colorlib</a>
                         </p>
                         <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                     </div>

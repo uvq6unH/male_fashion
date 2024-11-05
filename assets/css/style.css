@@ -10454,7 +10454,7 @@ input:focus {
 
 .login_part .login_part_text .btn_3:hover {
     background-color: #fff;
-    color           : #ff2020 !important
+    color           : #000000 !important
 }
 
 @media (max-width: 991px) {

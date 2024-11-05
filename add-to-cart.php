@@ -3,9 +3,11 @@ session_start();
 include 'auth.php'; // Xác thực người dùng
 include 'db.php'; // Kết nối cơ sở dữ liệu
 
+header('Content-Type: application/json'); // Đặt header cho phản hồi JSON
+
 // Kiểm tra nếu người dùng đã đăng nhập
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    echo json_encode(['status' => 'error', 'message' => 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.']);
     exit();
 }
 
@@ -44,8 +46,7 @@ $product_price = $product['PRICE'];
 $total_money = $product_price * $quantity;
 
 // Kiểm tra nếu sản phẩm đã có trong giỏ hàng
-$sql = "SELECT QUANTITY FROM orders_details 
-        WHERE IDPRODUCT = ? AND IDORDER = ?";
+$sql = "SELECT QUANTITY FROM orders_details WHERE IDPRODUCT = ? AND IDORDER = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("ii", $product_id, $order_id);
 $stmt->execute();
@@ -55,19 +56,16 @@ if ($result->num_rows > 0) {
     // Sản phẩm đã có trong giỏ, tăng số lượng và cập nhật giá
     $row = $result->fetch_assoc();
     $new_quantity = $row['QUANTITY'] + $quantity;
-    $new_total_price = $product_price * $new_quantity; // Cập nhật tổng giá
+    $new_total_price = $product_price * $new_quantity;
 
-    $sql = "UPDATE orders_details 
-            SET QUANTITY = ?, PRICE = ? 
-            WHERE IDPRODUCT = ? AND IDORDER = ?";
+    $sql = "UPDATE orders_details SET QUANTITY = ?, PRICE = ? WHERE IDPRODUCT = ? AND IDORDER = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("idii", $new_quantity, $new_total_price, $product_id, $order_id);
     $stmt->execute();
     $message = "Số lượng và giá đã được cập nhật.";
 } else {
     // Sản phẩm chưa có trong giỏ, thêm mới với giá đã tính
-    $sql = "INSERT INTO orders_details (IDORDER, IDPRODUCT, QUANTITY, PRICE) 
-            VALUES (?, ?, ?, ?)";
+    $sql = "INSERT INTO orders_details (IDORDER, IDPRODUCT, QUANTITY, PRICE) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("iiid", $order_id, $product_id, $quantity, $total_money);
     $stmt->execute();
@@ -75,9 +73,7 @@ if ($result->num_rows > 0) {
 }
 
 // Cập nhật tổng tiền trong bảng orders
-// Lấy tổng giá đơn hàng hiện tại từ orders_details
-$sql_total = "SELECT SUM(PRICE) AS total_money FROM orders_details 
-              WHERE IDORDER = ?";
+$sql_total = "SELECT SUM(PRICE) AS total_money FROM orders_details WHERE IDORDER = ?";
 $stmt_total = $conn->prepare($sql_total);
 $stmt_total->bind_param("i", $order_id);
 $stmt_total->execute();
@@ -85,14 +81,12 @@ $result_total = $stmt_total->get_result();
 $current_total_money = $result_total->fetch_assoc()['total_money'];
 
 // Kiểm tra xem mã giảm giá có trong session không
-$discount = $_SESSION['discount'] ?? 0; // Nếu không có mã giảm giá, discount sẽ là 0%
+$discount = $_SESSION['discount'] ?? 0;
 
-// Áp dụng mã giảm giá (nếu có)
 if ($discount > 0) {
-    $current_total_money = $current_total_money - ($current_total_money * ($discount / 100)); // Áp dụng giảm giá
+    $current_total_money -= ($current_total_money * ($discount / 100));
 }
 
-// Làm tròn số tiền đến 2 chữ số thập phân
 $current_total_money = round($current_total_money, 2);
 
 // Cập nhật tổng tiền vào bảng orders
@@ -105,6 +99,11 @@ $stmt_update_order->execute();
 $stmt->close();
 $conn->close();
 
-// Chuyển hướng trở lại trang cửa hàng hoặc nơi bạn muốn với thông báo thành công
-header("Location: shop.php?message=" . urlencode($message));
+// Trả về phản hồi JSON
+echo json_encode([
+    'status' => 'success',
+    'message' => $message,
+    'cart_total' => $current_total_money,
+    'cart_count' => $cartCount
+]);
 exit();

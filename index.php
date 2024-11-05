@@ -40,7 +40,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
             $imageSrc = 'img/product/' . htmlspecialchars($product['IMAGE']);
 ?>
             <div class="col-lg-3 col-md-6 col-sm-6 mix <?php echo htmlspecialchars($classString); ?>">
-                <div class="product__item">
+                <div class="product__item" data-id="<?php echo htmlspecialchars($product['ID']); ?>">
                     <div class="product__item__pic set-bg" data-setbg="<?php echo $imageSrc; ?>">
                         <img src="<?php echo $imageSrc; ?>" alt="<?php echo htmlspecialchars($product['NAME']); ?>" onerror="this.onerror=null; this.src='img/default-placeholder.png';">
                         <ul class="product__hover">
@@ -332,54 +332,6 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
                 </div>
             </div>
             <div class="row product__filter" id="product-container">
-                <!--<?php foreach ($products as $product) : ?>
-                    <?php
-                        $classes = [];
-                        if ($product['RATING'] == 5) {
-                            $classes[] = 'best-sellers';
-                        }
-                        if ($product['NEWARRIVALS'] == 1) {
-                            $classes[] = 'new-arrivals';
-                        }
-                        if ($product['SALE'] >= 50) {
-                            $classes[] = 'hot-sales';
-                        }
-                        $classString = implode(' ', $classes);
-                    ?>
-                    <div class="col-lg-3 col-md-6 col-sm-6 mix <?php echo htmlspecialchars($classString); ?>">
-                        <div class="product__item">
-                            <div class="product__item__pic set-bg" data-setbg="img/product/<?php echo htmlspecialchars($product['IMAGE']); ?>">
-                                <img src="img/product/<?php echo htmlspecialchars($product['IMAGE']); ?>" alt="<?php echo htmlspecialchars($product['NAME']); ?>" onerror="this.onerror=null; this.src='img/default-placeholder.png';">
-                                <ul class="product__hover">
-                                    <li><a href="#"><img src="img/icon/heart.png" alt="Add to favorites"></a></li>
-                                    <li><a href="#"><img src="img/icon/compare.png" alt="Compare"> <span>Compare</span></a></li>
-                                    <li><a href="#"><img src="img/icon/search.png" alt="Search"></a></li>
-                                </ul>
-                            </div>
-                            <div class="product__item__text">
-                                <h6><?php echo htmlspecialchars($product['NAME']); ?></h6>
-                                <a href="#" class="add-cart">+ Add To Cart</a>
-                                <div class="rating">
-                                    <?php
-                                    $fullStars = floor($product['RATING']);
-                                    $halfStar = $product['RATING'] - $fullStars >= 0.5;
-                                    for ($i = 0; $i < 5; $i++) {
-                                        if ($i < $fullStars) {
-                                            echo '<i class="fa fa-star"></i>';
-                                        } elseif ($halfStar && $i == $fullStars) {
-                                            echo '<i class="fa fa-star-half-o"></i>';
-                                            $halfStar = false;
-                                        } else {
-                                            echo '<i class="fa fa-star-o"></i>';
-                                        }
-                                    }
-                                    ?>
-                                </div>
-                                <h5>$<?php echo number_format($product['PRICE'], 2); ?></h5>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?> -->
                 <?php
                 ?>
             </div>
@@ -513,7 +465,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
     <footer class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-6 col-sm-6">
                     <div class="footer__about">
                         <div class="footer__logo">
                             <a href="#"><img src="img/footer-logo.png" alt=""></a>
@@ -524,27 +476,38 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
                 </div>
                 <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Leader</h6>
                         <ul>
-                            <li><a href="#">Clothing Store</a></li>
-                            <li><a href="#">Trending Shoes</a></li>
-                            <li><a href="#">Accessories</a></li>
-                            <li><a href="#">Sale</a></li>
+                            <li><a href="#">Nguyễn Tuấn Hưng</a></li>
+                            <li><a href="#">04-01-2003</a></li>
+                            <li><a href="#">21103100251</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Member</h6>
                         <ul>
-                            <li><a href="#">Contact Us</a></li>
-                            <li><a href="#">Payment Methods</a></li>
-                            <li><a href="#">Delivary</a></li>
-                            <li><a href="#">Return & Exchanges</a></li>
+                            <li><a href="#">Nguyễn Dương Ninh</a></li>
+                            <li><a href="#">04-03-2003</a></li>
+                            <li><a href="#">21103100262</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-lg-3 offset-lg-1 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <div class="footer__widget">
+                        <h6>Member</h6>
+                        <ul>
+                            <li><a href="#">Nguyễn Anh Huy</a></li>
+                            <li><a href="#">12-11-2003</a></li>
+                            <li><a href="#">21103100270</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-2 offset-lg-1 col-md-6 col-sm-6">
                     <div class="footer__widget">
                         <h6>NewLetter</h6>
                         <div class="footer__newslatter">
@@ -591,10 +554,26 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
     <script src="js/main.js"></script>
     <script>
         $(document).ready(function() {
+            // Hàm để gán sự kiện click cho sản phẩm
+            function attachProductClickEvent() {
+                const productItems = document.querySelectorAll('.product__item');
+
+                productItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        const productId = this.getAttribute('data-id');
+                        if (productId) {
+                            window.location.href = 'shop-details.php?id=' + productId;
+                        }
+                    });
+                });
+            }
+
+            // Gán sự kiện click cho các sản phẩm sau khi tải sản phẩm
             $('.filter__controls li').click(function() {
                 var filter = $(this).data('filter');
                 $('.filter__controls li').removeClass('active');
                 $(this).addClass('active');
+
                 $.ajax({
                     url: 'index.php',
                     type: 'GET',
@@ -604,10 +583,37 @@ if (isset($_GET['ajax']) && $_GET['ajax'] == '1') {
                     },
                     success: function(response) {
                         $('#product-container').html(response);
+                        attachProductClickEvent(); // Gọi hàm gán sự kiện click
                     },
                     error: function(xhr, status, error) {
                         console.error('AJAX error:', error);
                     }
+                });
+            });
+
+            // Gán sự kiện click cho các sản phẩm ban đầu
+            attachProductClickEvent();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const productItems = document.querySelectorAll('.product__item');
+
+            productItems.forEach(item => {
+                item.addEventListener('click', function(event) {
+                    // Chỉ thực hiện chuyển hướng nếu không nhấp vào phần lớp phủ
+                    const productId = this.getAttribute('data-id');
+                    if (productId) {
+                        window.location.href = 'shop-details.php?id=' + productId;
+                    }
+                });
+            });
+
+            const productHovers = document.querySelectorAll('.product__hover');
+            productHovers.forEach(hover => {
+                hover.addEventListener('click', function(event) {
+                    event.stopPropagation(); // Ngăn chặn sự kiện click bên ngoài .product__hover
+                    console.log("Hover actions triggered");
                 });
             });
         });

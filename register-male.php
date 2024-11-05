@@ -1,43 +1,48 @@
 <?php
 @session_start();
 include 'auth.php'; // Xác thực người dùng
-include 'db.php'; // Kết nối cơ sở dữ liệu // Bắt đầu phiên làm việc
+include 'db.php'; // Kết nối cơ sở dữ liệu
 
 // Khởi tạo biến thông báo
 $message = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
-    $username = $_POST['username'];
-    $password = $_POST['password'];
-    $address = $_POST['address'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
+    $address = trim($_POST['address']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
 
     // Kiểm tra các trường không được để trống
     if (empty($username) || empty($password) || empty($address) || empty($email) || empty($phone)) {
-        $message = 'Tất cả các trường đều là bắt buộc!';
+        $message = 'All fields are required!';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = 'Invalid email format!';
+    } elseif (!preg_match('/^[0-9]{10}$/', $phone)) { // Ví dụ cho số điện thoại Việt Nam
+        $message = 'Phone number must be 10 digits!';
+    } elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/', $password)) { // Kiểm tra mật khẩu
+        $message = 'Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one special character!';
     } else {
-        // Kiểm tra xem tên đăng nhập đã tồn tại chưa
-        $checkUsername = $conn->prepare("SELECT * FROM user WHERE USERNAME = ?");
-        $checkUsername->bind_param("s", $username);
+        // Kiểm tra xem tên đăng nhập, email hoặc số điện thoại đã tồn tại chưa
+        $checkUsername = $conn->prepare("SELECT * FROM user WHERE USERNAME = ? OR EMAIL = ? OR PHONE = ?");
+        $checkUsername->bind_param("sss", $username, $email, $phone);
         $checkUsername->execute();
         $result = $checkUsername->get_result();
 
         if ($result->num_rows > 0) {
-            $message = 'Tên đăng nhập đã tồn tại! Vui lòng chọn tên khác.';
+            $message = 'Username, Email, or Phone number already exists! Please choose another.';
         } else {
             // Lưu thông tin người dùng vào cơ sở dữ liệu
-            $sql = "INSERT INTO user (USERNAME, PASSWORD, ADDRESS, EMAIL, PHONE) VALUES (?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO user (USERNAME, PASSWORD, ADDRESS, ROLE, EMAIL, PHONE, CREATED_DATE, ISACTIVE ) VALUES (?, ?, ?, 'user', ?, ?, NOW(), 1)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssss", $username, $password, $address, $email, $phone); // Không hash mật khẩu
+            $stmt->bind_param("sssss", $username, $password, $address, $email, $phone); // Không băm mật khẩu
 
             if ($stmt->execute()) {
-                $message = 'Đăng ký thành công!';
+                $message = 'Sign up successfully!';
                 // Đặt lại các giá trị input
                 $username = $password = $address = $email = $phone = ''; // Làm rỗng các biến
             } else {
-                $message = 'Lỗi khi thêm dữ liệu: ' . $stmt->error;
+                $message = 'Something went wrong: ' . $stmt->error;
             }
 
             $stmt->close();
@@ -49,7 +54,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $conn->close();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="zxx">
 
@@ -94,11 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="offcanvas-menu-wrapper">
         <div class="offcanvas__option">
             <div class="offcanvas__links">
-                <?php if ($username): ?>
-                    <a href="logout.php"><?php echo htmlspecialchars($username); ?></a>
-                <?php else: ?>
-                    <a href="login-male.php">Sign in</a>
-                <?php endif; ?>
+                <a href="login-male.php">Sign in</a>
                 <a href="#">FAQs</a>
             </div>
             <div class="offcanvas__top__hover">
@@ -219,37 +219,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div class="login_part_text text-center">
                             <div class="login_part_text_iner">
                                 <h2>New to our Shop?</h2>
-                                <p>There are advances being made in science and technology
-                                    everyday, and a good example of this is the</p>
+                                <p>Men's fashion is a vibrant expression of individuality, featuring styles from sleek suits to casual streetwear. It continuously evolves, allowing men to define their unique style with confidence.</p>
+                                <a href="login-male.php" class="btn_3">Already have an account?</a>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6">
                         <div class="login_part_form">
                             <div class="login_part_form_iner">
-                                <h3>Welcome Back ! <br>
-                                    Please Create Account now</h3>
-                                <form class="row contact_form" action="" method="POST"
-                                    novalidate="novalidate">
-                                    <div class="col-md-12 form-group p_star">
-                                        <input type="text" class="form-control" id="username" name="username"
-                                            placeholder="Username (*)">
+                                <h3>Please Create Account now</h3>
+                                <form class="row contact_form" action="" method="POST" novalidate="novalidate" onsubmit="return validateForm()">
+                                    <div class="col-md-12 form-group">
+                                        <input type="text" class="form-control" id="username" name="username" placeholder="Username (*)" value="<?php echo htmlspecialchars($username ?? '', ENT_QUOTES); ?>" required>
                                     </div>
-                                    <div class="col-md-12 form-group p_star">
-                                        <input type="password" class="form-control" id="password" name="password"
-                                            placeholder="Password (*)">
+                                    <div class="col-md-12 form-group">
+                                        <input type="password" class="form-control" id="password" name="password" placeholder="Password (*)" required>
                                     </div>
-                                    <div class="col-md-12 form-group p_star">
-                                        <input type="text" class="form-control" id="address" name="address"
-                                            placeholder="Address (*)">
+                                    <div class="col-md-12 form-group">
+                                        <input type="text" class="form-control" id="address" name="address" placeholder="Address (*)" value="<?php echo htmlspecialchars($address ?? '', ENT_QUOTES); ?>" required>
                                     </div>
-                                    <div class="col-md-12 form-group p_star">
-                                        <input type="email" class="form-control" id="email" name="email"
-                                            placeholder="Email (*)">
+                                    <div class="col-md-12 form-group">
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="Email (*)" value="<?php echo htmlspecialchars($email ?? '', ENT_QUOTES); ?>" required>
                                     </div>
-                                    <div class="col-md-12 form-group p_star">
-                                        <input type="text" class="form-control" id="phone" name="phone"
-                                            placeholder="Phone (*)">
+                                    <div class="col-md-12 form-group">
+                                        <input type="text" class="form-control" id="phone" name="phone" placeholder="Phone (*)" value="<?php echo htmlspecialchars($phone ?? '', ENT_QUOTES); ?>" required>
                                     </div>
                                     <div class="col-md-12 form-group">
                                         <button type="submit" value="submit" class="btn_3">Sign Up</button>
@@ -328,19 +321,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <script src="js/main.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        // Kiểm tra xem có thông báo từ PHP không
-        <?php
-        if (!empty($message)) {
-            // Sử dụng JSON để tránh vấn đề về ký tự đặc biệt
-            $message_json = json_encode($message);
-            echo "Toastify({ text: $message_json, duration: 3000, gravity: 'top', position: 'right', backgroundColor: '#ff4444' }).showToast();";
+        var phpMessage = <?php echo json_encode($message ?? ''); ?>;
+
+        if (phpMessage) {
+            Toastify({
+                text: phpMessage,
+                duration: 3000,
+                gravity: 'top',
+                position: 'right',
+                backgroundColor: 'linear-gradient(to right, #ff5f6d, #ffc371)'
+            }).showToast();
+
             // Nếu đăng ký thành công, chuyển hướng sau 2 giây
-            if ($message === 'Đăng ký thành công!') {
-                echo "setTimeout(function() { window.location.href = 'login-male.php'; }, 1000);";
+            if (phpMessage === 'Sign up successfully!') {
+                setTimeout(function() {
+                    window.location.href = 'login-male.php';
+                }, 1000);
             }
         }
-        ?>
+
+        function validateForm() {
+            let isValid = true;
+            const inputs = document.querySelectorAll('.contact_form .form-control');
+            let emptyFields = false;
+
+            inputs.forEach(input => {
+                if (input.required && !input.value) {
+                    isValid = false;
+                    input.classList.add('is-invalid');
+                    emptyFields = true; // Đánh dấu rằng có ít nhất một trường rỗng
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+
+            if (emptyFields) {
+                Toastify({
+                    text: 'Please fill all required fields!',
+                    duration: 3000,
+                    gravity: 'top',
+                    position: 'right',
+                    backgroundColor: '#ff4444'
+                }).showToast();
+            }
+
+            return isValid;
+        }
     </script>
+
 </body>
 
 </html>

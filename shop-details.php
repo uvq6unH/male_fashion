@@ -8,7 +8,6 @@ if (isset($_GET['id'])) {
     $productId = $_GET['id'];
 
     // Truy vấn để lấy thông tin sản phẩm và hình ảnh
-    // Truy vấn để lấy thông tin sản phẩm và hình ảnh
     $sql = "SELECT p.ID, p.NAME, p.IMAGE, p.PRICE, p.DESCRIPTION, p.QUANTITY, p.RATING, c.NAME AS CATEGORY_NAME
         FROM product p
         JOIN category c ON p.IDCATEGORY = c.ID
@@ -26,9 +25,28 @@ if (isset($_GET['id'])) {
         exit();
     }
 
-    // Đóng kết nối
-    $stmt->close();
-    $conn->close();
+    // Truy vấn để lấy sản phẩm liên quan cùng danh mục
+    $sqlRelated = "SELECT p.ID, p.NAME, p.IMAGE, p.PRICE, p.RATING 
+               FROM product p 
+               WHERE p.IDCATEGORY = (SELECT IDCATEGORY FROM product WHERE ID = ?) AND p.ID != ? LIMIT 4";
+    $stmtRelated = $conn->prepare($sqlRelated);
+    $stmtRelated->bind_param("ii", $productId, $productId);
+    $stmtRelated->execute();
+    $resultRelated = $stmtRelated->get_result();
+    $relatedProducts = [];
+
+    if ($resultRelated->num_rows > 0) {
+        while ($row = $resultRelated->fetch_assoc()) {
+            $relatedProducts[] = $row;
+        }
+    }
+
+    // Đóng kết nối cho sản phẩm liên quan
+    $stmtRelated->close();
+
+    // Đóng kết nối chính nếu không còn sử dụng
+    // Chỉ đóng khi bạn đã hoàn tất tất cả các truy vấn
+    // $conn->close();
 } else {
     echo "ID sản phẩm không hợp lệ.";
     exit();
@@ -252,7 +270,6 @@ if (isset($_GET['id'])) {
                                 <ul>
                                     <li><span>SKU:</span> <?= $product['ID']; ?></li>
                                     <li><span>Categories:</span> <?= $product['CATEGORY_NAME']; ?></li>
-                                    <li><span>Tag:</span> Clothes, Skin, Body</li>
                                 </ul>
                             </div>
                         </div>
@@ -266,7 +283,7 @@ if (isset($_GET['id'])) {
                                     <a class="nav-link active" data-toggle="tab" href="#tabs-5" role="tab">Description</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" href="#tabs-6" role="tab">Customer Reviews(5)</a>
+                                    <a class="nav-link" data-toggle="tab" href="#tabs-6" role="tab">Customer Reviews</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" data-toggle="tab" href="#tabs-7" role="tab">Shipping & Returns</a>
@@ -317,158 +334,58 @@ if (isset($_GET['id'])) {
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <h3 class="related-title">Related Product</h3>
+                    <h3 class="related-title">Related Products</h3>
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-3 col-md-6 col-sm-6 col-sm-6">
-                    <div class="product__item">
-                        <div class="product__item__pic set-bg" data-setbg="img/product/product-1.jpg">
-                            <span class="label">New</span>
-                            <ul class="product__hover">
-                                <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
-                                <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-                                <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6>Piqué Biker Jacket</h6>
-                            <a href="#" class="add-cart">+ Add To Cart</a>
-                            <div class="rating">
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                            </div>
-                            <h5>$67.24</h5>
-                            <div class="product__color__select">
-                                <label for="pc-1">
-                                    <input type="radio" id="pc-1">
-                                </label>
-                                <label class="active black" for="pc-2">
-                                    <input type="radio" id="pc-2">
-                                </label>
-                                <label class="grey" for="pc-3">
-                                    <input type="radio" id="pc-3">
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 col-sm-6">
-                    <div class="product__item">
-                        <div class="product__item__pic set-bg" data-setbg="img/product/product-2.jpg">
-                            <ul class="product__hover">
-                                <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
-                                <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-                                <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6>Piqué Biker Jacket</h6>
-                            <a href="#" class="add-cart">+ Add To Cart</a>
-                            <div class="rating">
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                            </div>
-                            <h5>$67.24</h5>
-                            <div class="product__color__select">
-                                <label for="pc-4">
-                                    <input type="radio" id="pc-4">
-                                </label>
-                                <label class="active black" for="pc-5">
-                                    <input type="radio" id="pc-5">
-                                </label>
-                                <label class="grey" for="pc-6">
-                                    <input type="radio" id="pc-6">
-                                </label>
+                <?php foreach ($relatedProducts as $related): ?>
+                    <div class="col-lg-3 col-md-6 col-sm-6">
+                        <div class="product__item" data-id="<?= htmlspecialchars($related['ID']); ?>"> <!-- Thêm data-id -->
+                            <a href="shop-details.php?id=<?= htmlspecialchars($related['ID']); ?>">
+                                <div class="product__item__pic set-bg" data-setbg="img/product/<?= htmlspecialchars($related['IMAGE']); ?>">
+                                    <ul class="product__hover">
+                                        <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
+                                        <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
+                                        <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
+                                    </ul>
+                                </div>
+                            </a>
+                            <div class="product__item__text">
+                                <h6><?= htmlspecialchars($related['NAME']); ?></h6>
+                                <a href="#" class="add-cart">+ Add To Cart</a>
+                                <div class="rating">
+                                    <?php
+                                    // Sử dụng RATING từ sản phẩm liên quan
+                                    $fullStars = floor($related['RATING']); // Đảm bảo lấy từ $related
+                                    $halfStar = $related['RATING'] - $fullStars >= 0.5; // Đảm bảo lấy từ $related
+                                    for ($i = 0; $i < 5; $i++) {
+                                        if ($i < $fullStars) {
+                                            echo '<i class="fa fa-star"></i>';
+                                        } elseif ($halfStar && $i == $fullStars) {
+                                            echo '<i class="fa fa-star-half-o"></i>';
+                                            $halfStar = false;
+                                        } else {
+                                            echo '<i class="fa fa-star-o"></i>';
+                                        }
+                                    }
+                                    ?>
+                                </div>
+                                <h5>$<?= number_format($related['PRICE'], 2); ?></h5>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 col-sm-6">
-                    <div class="product__item sale">
-                        <div class="product__item__pic set-bg" data-setbg="img/product/product-3.jpg">
-                            <span class="label">Sale</span>
-                            <ul class="product__hover">
-                                <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
-                                <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-                                <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6>Multi-pocket Chest Bag</h6>
-                            <a href="#" class="add-cart">+ Add To Cart</a>
-                            <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star-o"></i>
-                            </div>
-                            <h5>$43.48</h5>
-                            <div class="product__color__select">
-                                <label for="pc-7">
-                                    <input type="radio" id="pc-7">
-                                </label>
-                                <label class="active black" for="pc-8">
-                                    <input type="radio" id="pc-8">
-                                </label>
-                                <label class="grey" for="pc-9">
-                                    <input type="radio" id="pc-9">
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-6 col-sm-6">
-                    <div class="product__item">
-                        <div class="product__item__pic set-bg" data-setbg="img/product/product-4.jpg">
-                            <ul class="product__hover">
-                                <li><a href="#"><img src="img/icon/heart.png" alt=""></a></li>
-                                <li><a href="#"><img src="img/icon/compare.png" alt=""> <span>Compare</span></a></li>
-                                <li><a href="#"><img src="img/icon/search.png" alt=""></a></li>
-                            </ul>
-                        </div>
-                        <div class="product__item__text">
-                            <h6>Diagonal Textured Cap</h6>
-                            <a href="#" class="add-cart">+ Add To Cart</a>
-                            <div class="rating">
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                                <i class="fa fa-star-o"></i>
-                            </div>
-                            <h5>$60.9</h5>
-                            <div class="product__color__select">
-                                <label for="pc-10">
-                                    <input type="radio" id="pc-10">
-                                </label>
-                                <label class="active black" for="pc-11">
-                                    <input type="radio" id="pc-11">
-                                </label>
-                                <label class="grey" for="pc-12">
-                                    <input type="radio" id="pc-12">
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
     </section>
     <!-- Related Section End -->
 
     <!-- Footer Section Begin -->
+
     <footer class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-6 col-sm-6">
                     <div class="footer__about">
                         <div class="footer__logo">
                             <a href="#"><img src="img/footer-logo.png" alt=""></a>
@@ -479,27 +396,38 @@ if (isset($_GET['id'])) {
                 </div>
                 <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Leader</h6>
                         <ul>
-                            <li><a href="#">Clothing Store</a></li>
-                            <li><a href="#">Trending Shoes</a></li>
-                            <li><a href="#">Accessories</a></li>
-                            <li><a href="#">Sale</a></li>
+                            <li><a href="#">Nguyễn Tuấn Hưng</a></li>
+                            <li><a href="#">04-01-2003</a></li>
+                            <li><a href="#">21103100251</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Member</h6>
                         <ul>
-                            <li><a href="#">Contact Us</a></li>
-                            <li><a href="#">Payment Methods</a></li>
-                            <li><a href="#">Delivary</a></li>
-                            <li><a href="#">Return & Exchanges</a></li>
+                            <li><a href="#">Nguyễn Dương Ninh</a></li>
+                            <li><a href="#">04-03-2003</a></li>
+                            <li><a href="#">21103100262</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-lg-3 offset-lg-1 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <div class="footer__widget">
+                        <h6>Member</h6>
+                        <ul>
+                            <li><a href="#">Nguyễn Anh Huy</a></li>
+                            <li><a href="#">12-11-2003</a></li>
+                            <li><a href="#">21103100270</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-2 offset-lg-1 col-md-6 col-sm-6">
                     <div class="footer__widget">
                         <h6>NewLetter</h6>
                         <div class="footer__newslatter">
@@ -519,9 +447,11 @@ if (isset($_GET['id'])) {
                         <p>Copyright ©
                             <script>
                                 document.write(new Date().getFullYear());
-                            </script>
-                            All rights reserved | This template is made with <i class="fa fa-heart-o"
-                                aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                            </script> |
+                            All rights reserved | This template is made with
+                            <i class="fa fa-heart-o" aria-hidden="true"></i>
+                            by
+                            <a href="https://colorlib.com" target="_blank">Colorlib</a>
                         </p>
                         <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                     </div>
@@ -553,6 +483,25 @@ if (isset($_GET['id'])) {
     <script src="js/mixitup.min.js"></script>
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hàm để gán sự kiện click cho sản phẩm liên quan
+            function attachRelatedProductClickEvent() {
+                const relatedProductItems = document.querySelectorAll('.related .product__item'); // Chọn tất cả sản phẩm liên quan
+                relatedProductItems.forEach(item => {
+                    item.addEventListener('click', function() {
+                        const productId = this.getAttribute('data-id');
+                        if (productId) {
+                            window.location.href = 'shop-details.php?id=' + productId; // Chuyển hướng
+                        }
+                    });
+                });
+            }
+            // Gán sự kiện click cho các sản phẩm liên quan
+            attachRelatedProductClickEvent();
+        });
+    </script>
+
 </body>
 
 </html>

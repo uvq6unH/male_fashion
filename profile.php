@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 $userId = $_SESSION['user_id'];
 
 // Lấy thông tin người dùng từ cơ sở dữ liệu
-$sql = "SELECT NAME, USERNAME, PHONE, EMAIL, ADDRESS FROM user WHERE ID = ?";
+$sql = "SELECT NAME, USERNAME, PHONE, EMAIL, ADDRESS, ROLE FROM user WHERE ID = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $userId);
 $stmt->execute();
@@ -279,7 +279,7 @@ $conn->close();
                         </div>
                         <div class="col-lg-4 col-md-6">
                             <div class="checkout__order">
-                                <h4 class="order__title">Your Infomation</h4>
+                                <h4 class="order__title">Your Information</h4>
                                 <ul class="checkout__total__products">
                                     <li>Name: <span><?php echo htmlspecialchars($user['NAME']); ?></span></li>
                                     <li>Username: <span><?php echo htmlspecialchars($user['USERNAME']); ?></span></li>
@@ -288,7 +288,9 @@ $conn->close();
                                     <li>Address: <span><?php echo htmlspecialchars($user['ADDRESS']); ?></span></li>
                                 </ul>
                                 <div class="d-flex justify-content-center">
-                                    <a class="primary-btn">Admin</a>
+                                    <?php if ($user['ROLE'] === 'admin'): ?>
+                                        <a href="admin-mau/index.php" class="primary-btn">Admin</a>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -408,7 +410,6 @@ $conn->close();
                     }).showToast();
                 });
         });
-
         function validateForm() {
             let isValid = true;
             const inputs = document.querySelectorAll('.checkout__input input');

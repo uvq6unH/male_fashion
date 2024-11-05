@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     } else {
         // Không tìm thấy tài khoản
-        $message = "Không tìm thấy tài khoản!";
+        $message = "Tài khoản hoặc mật khẩu không đúng!";
     }
 
     // Đóng kết nối nếu đã mở
@@ -229,9 +229,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <div class="login_part_text text-center">
                             <div class="login_part_text_iner">
                                 <h2>New to our Shop?</h2>
-                                <p>There are advances being made in science and technology
-                                    every day, and a good example of this is the</p>
-                                <a href="register-male.php" class="btn_3">Create an Account</a>
+                                <p>Men's fashion is a vibrant expression of individuality, featuring styles from sleek suits to casual streetwear. It continuously evolves, allowing men to define their unique style with confidence.</p>
+                                <a href="register-male.php" class="btn_3">Sign Up</a>
                             </div>
                         </div>
                     </div>
@@ -265,10 +264,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </section>
 
     <!-- Footer Section Begin -->
+
     <footer class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-6 col-sm-6">
                     <div class="footer__about">
                         <div class="footer__logo">
                             <a href="#"><img src="img/footer-logo.png" alt=""></a>
@@ -279,27 +279,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
                 <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Leader</h6>
                         <ul>
-                            <li><a href="#">Clothing Store</a></li>
-                            <li><a href="#">Trending Shoes</a></li>
-                            <li><a href="#">Accessories</a></li>
-                            <li><a href="#">Sale</a></li>
+                            <li><a href="#">Nguyễn Tuấn Hưng</a></li>
+                            <li><a href="#">04-01-2003</a></li>
+                            <li><a href="#">21103100251</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Member</h6>
                         <ul>
-                            <li><a href="#">Contact Us</a></li>
-                            <li><a href="#">Payment Methods</a></li>
-                            <li><a href="#">Delivary</a></li>
-                            <li><a href="#">Return & Exchanges</a></li>
+                            <li><a href="#">Nguyễn Dương Ninh</a></li>
+                            <li><a href="#">04-03-2003</a></li>
+                            <li><a href="#">21103100262</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-lg-3 offset-lg-1 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <div class="footer__widget">
+                        <h6>Member</h6>
+                        <ul>
+                            <li><a href="#">Nguyễn Anh Huy</a></li>
+                            <li><a href="#">12-11-2003</a></li>
+                            <li><a href="#">21103100270</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-2 offset-lg-1 col-md-6 col-sm-6">
                     <div class="footer__widget">
                         <h6>NewLetter</h6>
                         <div class="footer__newslatter">
@@ -319,9 +330,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <p>Copyright ©
                             <script>
                                 document.write(new Date().getFullYear());
-                            </script>
-                            All rights reserved | This template is made with <i class="fa fa-heart-o"
-                                aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                            </script> |
+                            All rights reserved | This template is made with
+                            <i class="fa fa-heart-o" aria-hidden="true"></i>
+                            by
+                            <a href="https://colorlib.com" target="_blank">Colorlib</a>
                         </p>
                         <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                     </div>
@@ -352,7 +365,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 duration: 3000,
                 gravity: 'top',
                 position: 'right',
-                backgroundColor: '#28a745', // Màu xanh cho thành công
+                backgroundColor: 'linear-gradient(to right, #ff5f6d, #ffc371)', // Màu xanh cho thành công
             }).showToast();
 
             // Chuyển hướng sau 2 giây
@@ -367,7 +380,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 duration: 3000,
                 gravity: 'top',
                 position: 'right',
-                backgroundColor: "linear-gradient(to right, #ff5f6d, #ffc371)", // Màu cho thông báo lỗi
+                backgroundColor: "#ff4444", // Màu cho thông báo lỗi
             }).showToast();
         <?php endif; ?>
     </script>

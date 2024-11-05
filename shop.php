@@ -12,61 +12,54 @@ if (!isset($_SESSION['user_id'])) {
 // Lấy ID người dùng từ phiên
 $userId = $_SESSION['user_id'];
 
-// Khởi tạo biến bộ lọc danh mục và điều kiện sắp xếp
+// Khởi tạo các biến bộ lọc
 $categoryFilter = '';
-$priceFilter = '';
-$priceCondition = ''; // Khởi tạo biến $priceCondition
-$sortOrder = 'DESC'; // Mặc định sắp xếp từ thấp đến cao
-$sortOption = 'high-low'; // Khởi tạo biến $sortOption
-$itemsPerPage = 12; // Số sản phẩm hiển thị mỗi trang
-$currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Lấy trang hiện tại từ URL
-$searchQuery = ''; // Khởi tạo biến tìm kiếm
+$priceCondition = '';
+$sortOrder = 'DESC';
+$sortOption = 'high-low';
+$itemsPerPage = 12;
+$currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$searchQuery = '';
+$brandFilter = ''; // Thêm biến lọc brand
 
 // Xử lý tìm kiếm
 if (isset($_GET['search'])) {
     $searchQuery = trim($_GET['search']);
 }
 
-// Kiểm tra xem danh mục có được thiết lập không
+// Kiểm tra lọc theo brand
+if (isset($_GET['brand'])) {
+    $brandFilter = $conn->real_escape_string($_GET['brand']);
+}
+
+// Kiểm tra lọc danh mục
 if (isset($_GET['category'])) {
     $categoryFilter = $conn->real_escape_string($_GET['category']);
 }
 
-// Kiểm tra xem có lựa chọn sắp xếp giá không
+// Kiểm tra sắp xếp giá
 if (isset($_GET['sort'])) {
     $sortOption = $_GET['sort'];
-
-    if ($sortOption == "high-low") {
-        $sortOrder = "DESC";
-    } elseif ($sortOption == "low-high") {
-        $sortOrder = "ASC";
-    }
+    $sortOrder = $sortOption == "low-high" ? "ASC" : "DESC";
 }
 
-// Kiểm tra xem có điều kiện giá nào không
+// Kiểm tra lọc giá
 if (isset($_GET['price'])) {
     $priceFilter = $_GET['price'];
-    // Xóa ký tự '$' nếu có và trim khoảng trắng
     $priceFilter = str_replace('$', '', trim($priceFilter));
 
-    // Kiểm tra xem có dấu '+' không
     if (strpos($priceFilter, '+') !== false) {
-        // Xử lý trường hợp giá lớn hơn một số nhất định
-        $minPrice = floatval(trim(str_replace('+', '', $priceFilter))); // Loại bỏ dấu '+'
-        $priceCondition = "p.PRICE >= $minPrice"; // Điều kiện cho giá lớn hơn hoặc bằng
+        $minPrice = floatval(trim(str_replace('+', '', $priceFilter)));
+        $priceCondition = "p.PRICE >= $minPrice";
     } else {
-        // Tạo điều kiện lọc giá
         $priceRange = explode(" - ", $priceFilter);
-
         if (count($priceRange) === 2) {
-            // Điều kiện lọc cho khoảng giá
             $minPrice = floatval(trim($priceRange[0]));
             $maxPrice = floatval(trim($priceRange[1]));
             $priceCondition = "p.PRICE BETWEEN $minPrice AND $maxPrice";
         } else {
-            // Xử lý trường hợp chỉ có giá tối thiểu
             $minPrice = floatval(trim($priceRange[0]));
-            $priceCondition = "p.PRICE >= $minPrice"; // Nếu chỉ có giá tối thiểu
+            $priceCondition = "p.PRICE >= $minPrice";
         }
     }
 }
@@ -74,18 +67,19 @@ if (isset($_GET['price'])) {
 // Truy vấn SQL để đếm tổng số sản phẩm
 $countQuery = "SELECT COUNT(*) AS total FROM product p JOIN category c ON p.IDCATEGORY = c.ID WHERE p.ISACTIVE = 1";
 
-// Thêm điều kiện lọc danh mục nếu được chọn
+// Thêm điều kiện lọc
 if (!empty($categoryFilter)) {
     $countQuery .= " AND c.NAME = '$categoryFilter'";
 }
-// Thêm điều kiện lọc giá nếu được chọn
 if (!empty($priceCondition)) {
     $countQuery .= " AND $priceCondition";
 }
-// Thêm điều kiện tìm kiếm
 if (!empty($searchQuery)) {
     $searchQuery = $conn->real_escape_string($searchQuery);
     $countQuery .= " AND p.NAME LIKE '%$searchQuery%'";
+}
+if (!empty($brandFilter)) {
+    $countQuery .= " AND LEFT(p.IMAGE, 2) = '$brandFilter'";
 }
 
 $countResult = $conn->query($countQuery);
@@ -95,40 +89,36 @@ $totalProducts = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalProducts / $itemsPerPage);
 $offset = ($currentPage - 1) * $itemsPerPage;
 
-// Truy vấn SQL để lấy dữ liệu sản phẩm với bộ lọc danh mục và sắp xếp giá
+// Truy vấn SQL để lấy dữ liệu sản phẩm
 $sql = "SELECT p.ID, p.NAME, p.IMAGE, p.PRICE, p.RATING, c.NAME AS CATEGORY_NAME 
         FROM product p 
         JOIN category c ON p.IDCATEGORY = c.ID 
         WHERE p.ISACTIVE = 1";
 
-// Thêm điều kiện lọc danh mục nếu được chọn
+// Thêm điều kiện lọc
 if (!empty($categoryFilter)) {
     $sql .= " AND c.NAME = '$categoryFilter'";
 }
-
-// Thêm điều kiện lọc giá nếu được chọn
 if (!empty($priceCondition)) {
     $sql .= " AND $priceCondition";
 }
-
-// Thêm điều kiện tìm kiếm
 if (!empty($searchQuery)) {
     $sql .= " AND p.NAME LIKE '%$searchQuery%'";
 }
+if (!empty($brandFilter)) {
+    $sql .= " AND LEFT(p.IMAGE, 2) = '$brandFilter'";
+}
 
-// Thêm điều kiện sắp xếp theo giá
-$sql .= " ORDER BY p.PRICE $sortOrder LIMIT $offset, $itemsPerPage"; // Thêm LIMIT để phân trang
+$sql .= " ORDER BY p.PRICE $sortOrder LIMIT $offset, $itemsPerPage";
 
-// Thực hiện truy vấn
 $result = $conn->query($sql);
 
-// Xử lý thêm sản phẩm vào giỏ hàng (add to cart)
+// Xử lý thêm sản phẩm vào giỏ hàng
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
     $product_id = (int)$_POST['product_id'];
-    $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1; // Giá trị mặc định là 1
-    $userId = $_SESSION['user_id']; // ID người dùng đã đăng nhập
+    $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+    $userId = $_SESSION['user_id'];
 
-    // Kiểm tra xem đã có đơn hàng chưa (chưa thanh toán)
     $order_query = "SELECT ID FROM orders WHERE IDUSER = ? AND TOTAL_MONEY IS NULL";
     $stmt = $conn->prepare($order_query);
     if (!$stmt) {
@@ -140,7 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
     $result_order = $stmt->get_result();
 
     if ($result_order->num_rows == 0) {
-        // Nếu chưa có đơn hàng, tạo đơn hàng mới
         $insert_order_query = "INSERT INTO orders (IDUSER, ORDERS_DATE) VALUES (?, NOW())";
         $stmt_insert = $conn->prepare($insert_order_query);
         if (!$stmt_insert) {
@@ -149,9 +138,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
         }
         $stmt_insert->bind_param("i", $userId);
         $stmt_insert->execute();
-        $order_id = $stmt_insert->insert_id; // Lấy ID của đơn hàng vừa tạo
+        $order_id = $stmt_insert->insert_id;
 
-        // Kiểm tra nếu $order_id bị null hoặc 0
         if ($order_id == 0) {
             echo "Lỗi: Không thể tạo đơn hàng mới.";
             exit();
@@ -159,13 +147,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
             echo "Đơn hàng mới đã được tạo với ID: " . $order_id . "<br>";
         }
     } else {
-        // Nếu đã có đơn hàng, lấy ID đơn hàng
         $row = $result_order->fetch_assoc();
         $order_id = $row['ID'];
         echo "Sản phẩm đã được thêm vào đơn hàng hiện có với ID: " . $order_id . "<br>";
     }
 
-    // Thêm chi tiết sản phẩm vào bảng orders_details
     $insert_detail_query = "INSERT INTO orders_details (IDORDER, IDPRODUCT, QUANTITY) VALUES (?, ?, ?)";
     $stmt_detail = $conn->prepare($insert_detail_query);
     if (!$stmt_detail) {
@@ -175,7 +161,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
     $stmt_detail->bind_param("iii", $order_id, $product_id, $quantity);
     $stmt_detail->execute();
 
-    // Kiểm tra xem sản phẩm có được thêm vào chi tiết đơn hàng không
     if ($stmt_detail->affected_rows > 0) {
         echo "Sản phẩm đã được thêm vào giỏ hàng!";
     } else {
@@ -393,10 +378,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                                         <div class="card-body">
                                             <div class="shop__sidebar__brand">
                                                 <ul>
-                                                    <li><a href="#">Louis Vuitton</a></li>
-                                                    <li><a href="#">Chanel</a></li>
-                                                    <li><a href="#">Hermes</a></li>
-                                                    <li><a href="#">Gucci</a></li>
+                                                    <li><a href="?brand=LV">Louis Vuitton</a></li>
+                                                    <li><a href="?brand=BB">Burberry</a></li>
+                                                    <li><a href="?brand=HM">Hermes</a></li>
+                                                    <li><a href="?brand=CT">Cartier</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -410,12 +395,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                                         <div class="card-body">
                                             <div class="shop__sidebar__price">
                                                 <ul>
-                                                    <li><a href="?price=$0.00 - $50.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$0.00 - $50.00</a></li>
-                                                    <li><a href="?price=$50.00 - $100.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$50.00 - $100.00</a></li>
-                                                    <li><a href="?price=$100.00 - $150.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$100.00 - $150.00</a></li>
-                                                    <li><a href="?price=$150.00 - $200.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$150.00 - $200.00</a></li>
-                                                    <li><a href="?price=$200.00 - $250.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$200.00 - $250.00</a></li>
-                                                    <li><a href="?price=$250.00+&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$250.00+</a></li>
+                                                    <li><a href="?price=$0.00 - $1000.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$0.00 - $1000.00</a></li>
+                                                    <li><a href="?price=$1000.00 - $2000.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$1000.00 - $2000.00</a></li>
+                                                    <li><a href="?price=$2000.00 - $5000.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$2000.00 - $5000.00</a></li>
+                                                    <li><a href="?price=$5000.00 - $10000.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$5000.00 - $10000.00</a></li>
+                                                    <li><a href="?price=$10000.00 - $20000.00&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$10000.00 - $20000.00</a></li>
+                                                    <li><a href="?price=$20000.00+&category=<?php echo htmlspecialchars($categoryFilter); ?>&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">$20000.00+</a></li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -452,62 +437,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                                                 <label for="4xl">4xl
                                                     <input type="radio" id="4xl">
                                                 </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseFive">Colors</a>
-                                    </div>
-                                    <div id="collapseFive" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__color">
-                                                <label class="c-1" for="sp-1">
-                                                    <input type="radio" id="sp-1">
-                                                </label>
-                                                <label class="c-2" for="sp-2">
-                                                    <input type="radio" id="sp-2">
-                                                </label>
-                                                <label class="c-3" for="sp-3">
-                                                    <input type="radio" id="sp-3">
-                                                </label>
-                                                <label class="c-4" for="sp-4">
-                                                    <input type="radio" id="sp-4">
-                                                </label>
-                                                <label class="c-5" for="sp-5">
-                                                    <input type="radio" id="sp-5">
-                                                </label>
-                                                <label class="c-6" for="sp-6">
-                                                    <input type="radio" id="sp-6">
-                                                </label>
-                                                <label class="c-7" for="sp-7">
-                                                    <input type="radio" id="sp-7">
-                                                </label>
-                                                <label class="c-8" for="sp-8">
-                                                    <input type="radio" id="sp-8">
-                                                </label>
-                                                <label class="c-9" for="sp-9">
-                                                    <input type="radio" id="sp-9">
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseSix">Tags</a>
-                                    </div>
-                                    <div id="collapseSix" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__tags">
-                                                <a class="category-link" href="?category=Product&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Product</a>
-                                                <a class="category-link" href="?category=Bags&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Bags</a>
-                                                <a class="category-link" href="?category=Shoes&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Shoes</a>
-                                                <a class="category-link" href="?category=Fashion&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Fashion</a>
-                                                <a class="category-link" href="?category=Clothing&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Clothing</a>
-                                                <a class="category-link" href="?category=Hats&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Hats</a>
-                                                <a class="category-link" href="?category=Accessories&sort=<?php echo isset($_GET['sort']) ? $_GET['sort'] : 'high-low'; ?>">Accessories</a>
                                             </div>
                                         </div>
                                     </div>
@@ -604,7 +533,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
     <footer class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-lg-3 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-6 col-sm-6">
                     <div class="footer__about">
                         <div class="footer__logo">
                             <a href="#"><img src="img/footer-logo.png" alt=""></a>
@@ -615,27 +544,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                 </div>
                 <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Leader</h6>
                         <ul>
-                            <li><a href="#">Clothing Store</a></li>
-                            <li><a href="#">Trending Shoes</a></li>
-                            <li><a href="#">Accessories</a></li>
-                            <li><a href="#">Sale</a></li>
+                            <li><a href="#">Nguyễn Tuấn Hưng</a></li>
+                            <li><a href="#">04-01-2003</a></li>
+                            <li><a href="#">21103100251</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6">
                     <div class="footer__widget">
-                        <h6>Shopping</h6>
+                        <h6>Member</h6>
                         <ul>
-                            <li><a href="#">Contact Us</a></li>
-                            <li><a href="#">Payment Methods</a></li>
-                            <li><a href="#">Delivary</a></li>
-                            <li><a href="#">Return & Exchanges</a></li>
+                            <li><a href="#">Nguyễn Dương Ninh</a></li>
+                            <li><a href="#">04-03-2003</a></li>
+                            <li><a href="#">21103100262</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-lg-3 offset-lg-1 col-md-6 col-sm-6">
+                <div class="col-lg-2 col-md-3 col-sm-6">
+                    <div class="footer__widget">
+                        <h6>Member</h6>
+                        <ul>
+                            <li><a href="#">Nguyễn Anh Huy</a></li>
+                            <li><a href="#">12-11-2003</a></li>
+                            <li><a href="#">21103100270</a></li>
+                            <li><a href="#">DHTI15A3HN</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-2 offset-lg-1 col-md-6 col-sm-6">
                     <div class="footer__widget">
                         <h6>NewLetter</h6>
                         <div class="footer__newslatter">
@@ -655,9 +595,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['product_id'])) {
                         <p>Copyright ©
                             <script>
                                 document.write(new Date().getFullYear());
-                            </script>
-                            All rights reserved | This template is made with <i class="fa fa-heart-o"
-                                aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+                            </script> |
+                            All rights reserved | This template is made with
+                            <i class="fa fa-heart-o" aria-hidden="true"></i>
+                            by
+                            <a href="https://colorlib.com" target="_blank">Colorlib</a>
                         </p>
                         <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                     </div>
