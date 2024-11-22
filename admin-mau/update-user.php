@@ -8,13 +8,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     $id = $_POST['id'];
     $name = $_POST['name'];
     $email = $_POST['email'];
-    $password = $_POST['password']; // Directly using the password
     $role = $_POST['role'];
     $isactive = isset($_POST['isactive']) ? $_POST['isactive'] : 0;
 
-    $sql = "UPDATE user SET NAME = ?, EMAIL = ?, PASSWORD = ?, ROLE = ?, ISACTIVE = ? WHERE ID = ?";
+    $sql = "UPDATE user SET NAME = ?, EMAIL = ?, ROLE = ?, ISACTIVE = ? WHERE ID = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssssii", $name, $email, $password, $role, $isactive, $id);
+    $stmt->bind_param("sssii", $name, $email, $role, $isactive, $id);
 
     if (!$stmt->execute()) {
         $message = 'Execute failed: (' . $stmt->errno . ') ' . $stmt->error;
@@ -27,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    $sql = "SELECT NAME, EMAIL, PASSWORD, ROLE, ISACTIVE FROM user WHERE ID = ?";
+    $sql = "SELECT NAME, EMAIL, ROLE, ISACTIVE FROM user WHERE ID = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -143,23 +142,6 @@ $conn->close();
                     <i class="fa-solid fa-credit-card"></i>
                     <span>Payments</span></a>
             </li>
-
-
-
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
-
-            <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
-
-            <!-- Sidebar Message -->
-            <div class="sidebar-card d-none d-lg-flex">
-                <img class="sidebar-card-illustration mb-2" src="img/undraw_rocket.svg" alt="...">
-                <p class="text-center mb-2"><strong>SB Admin Pro</strong> is packed with premium features, components, and more!</p>
-                <a class="btn btn-success btn-sm" href="https://startbootstrap.com/theme/sb-admin-pro">Upgrade to Pro!</a>
-            </div>
 
         </ul>
         <!-- End of Sidebar -->
@@ -398,7 +380,6 @@ $conn->close();
                                                 <th>ID</th>
                                                 <th>NAME</th>
                                                 <th>EMAIL</th>
-                                                <th>PASSWORD</th>
                                                 <th>ROLE</th>
                                                 <th>ISACTIVE</th>
                                                 <th>UPDATE</th>
@@ -409,7 +390,6 @@ $conn->close();
                                                 <th>ID</th>
                                                 <th>NAME</th>
                                                 <th>EMAIL</th>
-                                                <th>PASSWORD</th>
                                                 <th>ROLE</th>
                                                 <th>ISACTIVE</th>
                                                 <th>UPDATE</th>
@@ -420,7 +400,6 @@ $conn->close();
                                                 <td><input class="form-control" type="text" name="id" value="<?php echo htmlspecialchars($id); ?>" readonly></td>
                                                 <td><input class="form-control" type="text" name="name" value="<?php echo htmlspecialchars($user['NAME']); ?>" required></td>
                                                 <td><input class="form-control" type="email" name="email" value="<?php echo htmlspecialchars($user['EMAIL']); ?>" required></td>
-                                                <td><input class="form-control" type="password" name="password" required></td>
                                                 <td><input class="form-control" type="text" name="role" value="<?php echo htmlspecialchars($user['ROLE']); ?>" required></td>
                                                 <td>
                                                     <select class="form-select form-select-sm" name="isactive" required>

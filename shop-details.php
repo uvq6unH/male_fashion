@@ -168,7 +168,7 @@ if (isset($_GET['id'])) {
                         <ul>
                             <li><a href="./index.php">Home</a></li>
                             <li class="active"><a href="./shop.php">Shop</a></li>
-                            <li><a href="#">Pages</a>
+                            <li><a href="">Pages</a>
                                 <ul class="dropdown">
                                     <li><a href="./about.php">About Us</a></li>
                                     <li><a href="./shop-details.php">Shop Details</a></li>
@@ -234,7 +234,7 @@ if (isset($_GET['id'])) {
                 </div>
             </div>
         </div>
-        <div class="product__details__content">
+        <div class="product__details__content" data-id="<?= htmlspecialchars($product['ID']); ?>">
             <div class="container">
                 <div class="row d-flex justify-content-center">
                     <div class="col-lg-8">
@@ -381,7 +381,6 @@ if (isset($_GET['id'])) {
     <!-- Related Section End -->
 
     <!-- Footer Section Begin -->
-
     <footer class="footer">
         <div class="container">
             <div class="row">
@@ -440,23 +439,7 @@ if (isset($_GET['id'])) {
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="footer__copyright__text">
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                        <p>Copyright ©
-                            <script>
-                                document.write(new Date().getFullYear());
-                            </script> |
-                            All rights reserved | This template is made with
-                            <i class="fa fa-heart-o" aria-hidden="true"></i>
-                            by
-                            <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                        </p>
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                    </div>
-                </div>
-            </div>
+
         </div>
     </footer>
     <!-- Footer Section End -->
@@ -501,7 +484,96 @@ if (isset($_GET['id'])) {
             attachRelatedProductClickEvent();
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hàm xử lý sự kiện "Add to Cart" cho Shop Details
+            function handleShopDetailsAddToCart() {
+                const shopDetailsButton = document.querySelector('.shop-details .primary-btn'); // Nút "Add to Cart" trong shop-details
+                const shopDetailsProductItem = document.querySelector('.shop-details .product__details__content'); // Sản phẩm trong shop-details
 
+                if (shopDetailsButton && shopDetailsProductItem) {
+                    shopDetailsButton.addEventListener('click', function(event) {
+                        event.preventDefault();
+
+                        const productId = shopDetailsProductItem.getAttribute('data-id');
+                        const productPriceText = shopDetailsProductItem.querySelector('h3').innerText; // Lấy giá từ h3
+                        const productPrice = parseFloat(productPriceText.replace('$', ''));
+
+                        let totalPrice = parseFloat(document.querySelector('.total-price').innerText.replace('$', ''));
+                        let cartCount = parseInt(document.querySelector('.cart-count').innerText);
+
+                        totalPrice += productPrice;
+                        cartCount += 1;
+
+                        document.querySelector('.total-price').innerText = '$' + totalPrice.toFixed(2);
+                        document.querySelector('.cart-count').innerText = cartCount;
+
+                        fetch('add-to-cart.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: `product_id=${productId}&quantity=1`
+                            })
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log('Item added to cart:', data);
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    });
+                }
+            }
+
+            // Hàm xử lý sự kiện "Add to Cart" cho Related Products
+            function handleRelatedAddToCart() {
+                const relatedAddToCartButtons = document.querySelectorAll('.related .add-cart'); // Tất cả nút "Add to Cart" trong related section
+
+                relatedAddToCartButtons.forEach(button => {
+                    const relatedProductItem = button.closest('.product__item'); // Lấy phần tử cha sản phẩm liên quan
+
+                    button.addEventListener('click', function(event) {
+                        event.preventDefault();
+
+                        const productId = relatedProductItem.getAttribute('data-id');
+                        const productPriceText = relatedProductItem.querySelector('h5').innerText; // Lấy giá từ h3
+                        const productPrice = parseFloat(productPriceText.replace('$', ''));
+
+                        let totalPrice = parseFloat(document.querySelector('.total-price').innerText.replace('$', ''));
+                        let cartCount = parseInt(document.querySelector('.cart-count').innerText);
+
+                        totalPrice += productPrice;
+                        cartCount += 1;
+
+                        document.querySelector('.total-price').innerText = '$' + totalPrice.toFixed(2);
+                        document.querySelector('.cart-count').innerText = cartCount;
+
+                        fetch('add-to-cart.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: `product_id=${productId}&quantity=1`
+                            })
+                            .then(response => response.text())
+                            .then(data => {
+                                console.log('Item added to cart:', data);
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                            });
+                    });
+                });
+            }
+
+            // Gán sự kiện cho Shop Details
+            handleShopDetailsAddToCart();
+
+            // Gán sự kiện cho Related Products
+            handleRelatedAddToCart();
+        });
+    </script>
 </body>
 
 </html>

@@ -120,7 +120,7 @@ include 'db.php'; // Kết nối cơ sở dữ liệu
                         <ul>
                             <li><a href="./index.php">Home</a></li>
                             <li><a href="./shop.php">Shop</a></li>
-                            <li><a href="#">Pages</a>
+                            <li><a href="">Pages</a>
                                 <ul class="dropdown">
                                     <li><a href="./about.php">About Us</a></li>
                                     <li><a href="./shop-details.php">Shop Details</a></li>
@@ -423,23 +423,7 @@ include 'db.php'; // Kết nối cơ sở dữ liệu
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="footer__copyright__text">
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                        <p>Copyright ©
-                            <script>
-                                document.write(new Date().getFullYear());
-                            </script> |
-                            All rights reserved | This template is made with
-                            <i class="fa fa-heart-o" aria-hidden="true"></i>
-                            by
-                            <a href="https://colorlib.com" target="_blank">Colorlib</a>
-                        </p>
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-                    </div>
-                </div>
-            </div>
+
         </div>
     </footer>
     <!-- Footer Section End -->

@@ -164,7 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <ul>
                             <li class="active"><a href="./index.php">Home</a></li>
                             <li><a href="./shop.php">Shop</a></li>
-                            <li><a href="#">Pages</a>
+                            <li><a href="">Pages</a>
                                 <ul class="dropdown">
                                     <li><a href="./about.php">About Us</a></li>
                                     <li><a href="./shop-details.php">Shop Details</a></li>
