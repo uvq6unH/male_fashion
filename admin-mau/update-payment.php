@@ -142,6 +142,13 @@ $conn->close();
                     <span>Payments</span></a>
             </li>
 
+            <!-- Nav Item - Tables -->
+            <li class="nav-item">
+                <a class="nav-link" href="../admin-mau/Feedbacks.php">
+                    <i class="fa-solid fa-file"></i>
+                    <span>Feedback</span></a>
+            </li>
+
         </ul>
         <!-- End of Sidebar -->
 

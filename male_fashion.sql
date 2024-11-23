@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 06, 2024 at 03:59 AM
+-- Generation Time: Nov 23, 2024 at 06:47 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,13 +40,13 @@ CREATE TABLE `category` (
 --
 
 INSERT INTO `category` (`ID`, `NAME`, `QUANTITY`, `IMAGE`, `ISACTIVE`) VALUES
-(1, 'Bags', 1, 'product-13.jpg', 1),
-(2, 'Shoes', 1, 'product-1.jpg', 1),
-(3, 'Clothing', 1, 'product-2.jpg', 1),
-(4, 'Hats', 1, 'product-15.jpg', 1),
-(5, 'Accessories', 1, 'product-14.jpg', 1),
-(6, 'Fashion', 1, 'product-6.jpg', 1),
-(7, 'Product', 1, 'product-10.jpg', 1);
+(1, 'Bags', 1, 'BBRA_1.png', 1),
+(2, 'Shoes', 1, 'BBRS_1.png', 1),
+(3, 'Clothing', 1, 'LV_5.png', 1),
+(4, 'Hats', 1, 'HMH_3.png', 1),
+(5, 'Accessories', 1, 'CTA_1.png', 1),
+(6, 'Fashion', 1, 'BBRA_2.png', 1),
+(7, 'Product', 1, 'CNP_3.png', 1);
 
 -- --------------------------------------------------------
 
@@ -69,7 +69,8 @@ CREATE TABLE `feedback` (
 
 INSERT INTO `feedback` (`ID`, `IDUSER`, `NAME`, `EMAIL`, `MESSAGE`, `ISACTIVE`) VALUES
 (1, 1, 'Nguyễn Tuấn Hưng', 'xenonex04@gmail.com', 'gud', 0),
-(2, 1, 'Nguyễn Tuấn Hưng', 'xenonex04@gmail.com', 'gud', 0);
+(2, 1, 'Nguyễn Tuấn Hưng', 'xenonex04@gmail.com', 'gud', 0),
+(3, 4, 'huybeovcl', 'test@gmail.com', 'shop ban hang nhu cut', 0);
 
 -- --------------------------------------------------------
 
@@ -95,7 +96,8 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`ID`, `IDPAYMENT`, `IDTRANSPORT`, `ORDERS_DATE`, `IDUSER`, `TOTAL_MONEY`, `NOTES`, `RECIPIENT_NAME`, `ADDRESS`, `PHONE`) VALUES
-(122, 1, 1, '2024-11-04 10:47:51', 1, 1725000, 'done', 'Nguyễn Tuấn Hưng', 'Thanh Xuân, Hà Nội', '0943213826');
+(122, 1, 1, '2024-11-04 10:47:51', 1, 1725000, 'done', 'Nguyễn Tuấn Hưng', 'Thanh Xuân, Hà Nội', '0943213826'),
+(126, 1, 1, '2024-11-08 14:19:22', 2, 84075, 'done', 'admin', 'admin', 'admin');
 
 -- --------------------------------------------------------
 
@@ -116,7 +118,9 @@ CREATE TABLE `orders_details` (
 --
 
 INSERT INTO `orders_details` (`ID`, `IDORDER`, `IDPRODUCT`, `QUANTITY`, `PRICE`) VALUES
-(94, 122, 45, 10, 2300000);
+(94, 122, 45, 10, 2300000),
+(108, 126, NULL, 1, 0),
+(111, 126, 46, 1, 88500);
 
 -- --------------------------------------------------------
 
@@ -246,8 +250,8 @@ CREATE TABLE `user` (
 INSERT INTO `user` (`ID`, `NAME`, `USERNAME`, `PASSWORD`, `ROLE`, `ADDRESS`, `EMAIL`, `PHONE`, `CREATED_DATE`, `ISACTIVE`) VALUES
 (1, 'Nguyễn Tuấn Hưng', 'puddpuss', 'Josee1567@', 'admin', 'Thanh Xuân, Hà Nội', 'xenonex04@gmail.com', '0943213826', NULL, 1),
 (2, 'admin', 'admin', 'admin', 'admin', 'admin', 'admin@admin.admin', 'admin', NULL, 1),
-(3, 'Nguyễn Dương Ninh', 'ninhmaytroem', '1', 'user', 'Kim Ngưu, Hà Nội', 'maytroem@gmail.com', '0123456789', NULL, 1),
-(4, 'Nguyễn Anh Huy', 'huydz', 'huydz', 'user', 'La Thành, Hà Nội', 'huydz@gmail.com', '0987654321', NULL, 1);
+(3, 'Nguyễn Dương Ninh', 'ninhmaytroem', '1', 'admin', 'Kim Ngưu, Hà Nội', 'maytroem@gmail.com', '0123456789', NULL, 1),
+(4, 'Nguyễn Anh Huy', 'huydz', 'huydz', 'admin', 'La Thành, Hà Nội', 'huydz@gmail.com', '0987654321', NULL, 1);
 
 --
 -- Indexes for dumped tables
@@ -322,19 +326,19 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=126;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
 
 --
 -- AUTO_INCREMENT for table `orders_details`
 --
 ALTER TABLE `orders_details`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=146;
 
 --
 -- AUTO_INCREMENT for table `product`
@@ -346,7 +350,7 @@ ALTER TABLE `product`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Constraints for dumped tables
